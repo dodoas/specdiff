@@ -1,8 +1,13 @@
 # Specdiff
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/specdiff`. To experiment with that code, run `bin/console` for an interactive prompt.
+A gem for improving diff output in webmock.
 
-TODO: Delete this and the text above, and describe your gem
+Specdiff implements heuristics to diff various datatypes commonly encountered
+when writing tests. The goal of this is to improve the legibility of error
+messages when said tests inevitably fail.
+
+In other words, I wrote this because I was staring at illegible test output and
+thought I could make some improvements.
 
 ## Installation
 
@@ -22,7 +27,17 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Put the following in your `spec_helper.rb` (or equivalent initializer for test environment)
+
+```rb
+# spec_helper.rb
+
+require "specdiff"
+require "specdiff/webmock" # optional, webmock patches
+require "specdiff/rspec" # optional, rspec patches
+```
+
+````
 
 ## Development
 
