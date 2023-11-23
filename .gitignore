@@ -9,3 +9,6 @@
 
 # rspec failure tracking
 .rspec_status
+
+# local installed gem bundle, ala node_modules for npm
+/.gem-bundle/
