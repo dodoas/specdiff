@@ -40,7 +40,7 @@ private
   def parse_side(raw_value)
     type = detect_type(raw_value)
 
-    Side.new(value: raw_value, type:)
+    Side.new(value: raw_value, type: type)
   end
 
   def detect_type(thing)
