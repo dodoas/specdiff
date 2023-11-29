@@ -8,12 +8,10 @@ Gem::Specification.new do |spec|
   spec.authors = ["Odin Heggvold Bekkelund"]
   spec.email = ["odinhb@protonmail.com"]
 
-  spec.summary = "Improved diffs for your test runner"
-  spec.homepage = "https://www.github.com/odinhb/specdiff"
+  spec.summary = "Improved request body diffs for webmock"
+  spec.homepage = "https://github.com/odinhb/specdiff"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
-
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -26,8 +24,6 @@ Gem::Specification.new do |spec|
       (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
     end
   end
-  spec.bindir = "exe"
-  spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
   spec.add_dependency "hashdiff", "~> 1.0"
