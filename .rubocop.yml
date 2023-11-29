@@ -53,6 +53,8 @@ Style/SpecialGlobalVars:
 
 Naming/BlockForwarding: # new in 1.24
   Enabled: false
+Naming/MethodParameterName:
+  Enabled: false
 
 ##
 # SECURITY COPS
@@ -81,6 +83,8 @@ Lint/DeprecatedConstants: # new in 1.8
   Enabled: true
 Lint/DuplicateBranch: # new in 1.3
   Enabled: true
+  IgnoreLiteralBranches: true
+  IgnoreConstantBranches: true
 Lint/DuplicateMagicComment: # new in 1.37
   Enabled: true
 Lint/DuplicateMatchPattern: # new in 1.50
@@ -148,6 +152,8 @@ Gemspec/DeprecatedAttributeAssignment: # new in 1.30
 Gemspec/DevelopmentDependencies: # new in 1.44
   Enabled: true
 Gemspec/RequireMFA: # new in 1.23
+  Enabled: false
+Gemspec/OrderedDependencies:
   Enabled: false
 
 ##

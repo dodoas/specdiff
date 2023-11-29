@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gem "specdiff", require: false, path: "../../"
+
+gem "webmock", require: false
+gem "http"
