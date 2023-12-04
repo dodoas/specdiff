@@ -61,13 +61,25 @@ diff.empty? # => true/false, if it is empty you might want to not print the diff
 diff.to_s # => a string for showing to a developer who may or may not be scratching their head
 ```
 
+### Registering plugins
+
+```rb
+# Specdiff comes with json support, but it must be loaded like so:
+Specdiff.load!(:json)
+
+# Custom plugins can be loaded like this:
+Specdiff.load!(MyCustomType)
+```
+
+Check out the [source code](./lib/specdiff/plugins/json.rb) to learn the plugin interface.
+
 ## Development
 
 Install the software versions specified in `.tool-versions`.
 
 Run `bin/setup` to install dependencies. Then, run `bundle exec rake` to run the tests and linter and make sure they're green before starting to make your changes.
 
-Run `bundle exec rake -AD` gor a full list of all the available tasks you may use for development purposes.
+Run `bundle exec rake -AD` for a full list of all the available tasks you may use for development purposes.
 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment with the gem code loaded.
 
