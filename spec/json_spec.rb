@@ -108,4 +108,28 @@ RSpec.describe "optional included json differ support" do
       changed "this" from "isn't" to "is"
     DIFF
   end
+
+  it "produces an empty diff from hashes" do
+    json1 = JSON.generate({
+      this: "hash",
+      exists: true,
+      number: 345,
+    })
+    json2 = json1.dup
+
+    result = diff(json1, json2)
+
+    expect(result.empty?).to eq(true)
+    expect(result.to_s).to eq("")
+  end
+
+  it "produces an empty diff from arrays" do
+    json1 = JSON.generate([4, 45, "342", "test", 213])
+    json2 = json1.dup
+
+    result = diff(json1, json2)
+
+    expect(result.empty?).to eq(true)
+    expect(result.to_s).to eq("")
+  end
 end

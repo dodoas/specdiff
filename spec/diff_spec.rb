@@ -121,6 +121,22 @@ RSpec.describe "Specdiff" do
       DIFF
     end
 
+    it "produces an empty diff" do
+      txt1 = <<~TXT
+        my
+        text
+        text
+        text
+        ;''
+      TXT
+      txt2 = txt1.dup
+
+      result = diff(txt1, txt2)
+
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq("")
+    end
+
     describe "encoding" do
       it "diffs in a non-standard encoding" do
         txt1 = <<~TXT.encode("Windows-1252")
@@ -427,6 +443,30 @@ RSpec.describe "Specdiff" do
         added [0]."a" with value "b"
         added [0].c with value :d
       DIFF
+    end
+
+    it "produces an empty diff from hashes" do
+      hash1 = {
+        this: "hash",
+        exists: true,
+        number: 345,
+      }
+      hash2 = hash1.dup
+
+      result = diff(hash1, hash2)
+
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq("")
+    end
+
+    it "produces an empty diff from arrays" do
+      array1 = [4, 45, "342", "test", 213]
+      array2 = array1.dup
+
+      result = diff(array1, array2)
+
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq("")
     end
   end
 

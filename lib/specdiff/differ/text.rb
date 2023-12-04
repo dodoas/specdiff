@@ -47,6 +47,8 @@ class Specdiff::Differ::Text
       diff << hunks.last.diff(:unified).to_s
     end
 
+    return diff if diff == ""
+
     diff << "\n"
 
     return colorize_by_line(diff) do |line|
@@ -65,6 +67,10 @@ class Specdiff::Differ::Text
         reset_color(line)
       end
     end
+  end
+
+  def self.empty?(diff)
+    diff.raw == ""
   end
 
   def self.stringify(diff)

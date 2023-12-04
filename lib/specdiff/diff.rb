@@ -10,7 +10,8 @@
   end
 
   def empty?
-    differ == ::Specdiff::Differ::NotFound
+    differ == ::Specdiff::Differ::NotFound ||
+      (differ.respond_to?(:empty?) && differ.empty?(self))
   end
 
   def types

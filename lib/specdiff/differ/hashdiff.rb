@@ -17,6 +17,10 @@ class Specdiff::Differ::Hashdiff
     )
   end
 
+  def self.empty?(diff)
+    diff.raw.empty?
+  end
+
   def self.stringify(diff)
     diff.raw.pretty_inspect
 
