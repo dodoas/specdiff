@@ -1,5 +1,4 @@
 require "hashdiff"
-require "pp"
 
 class Specdiff::Differ::Hashdiff
   extend ::Specdiff::Colorize
@@ -10,7 +9,7 @@ class Specdiff::Differ::Hashdiff
     # representation does not.
     # hmm it really seems like use_lcs: true gives much less human-readable
     # (human-comprehensible) output when arrays are involved.
-    Hashdiff.diff(
+    ::Hashdiff.diff(
       a.value, b.value,
       array_path: true,
       use_lcs: false,
@@ -22,8 +21,6 @@ class Specdiff::Differ::Hashdiff
   end
 
   def self.stringify(diff)
-    diff.raw.pretty_inspect
-
     result = +""
 
     diff.raw.each do |change|

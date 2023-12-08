@@ -1,9 +1,8 @@
 module Specdiff
-  THREADLOCAL_PLUGINS_KEY = :__specdiff_plugins
-
-  def self.plugins
-    threadlocal[THREADLOCAL_PLUGINS_KEY]
+  class << self
+    attr_reader :plugins
   end
+  @plugins = []
 
   BUILTIN_PLUGINS = %i[json]
   BUILTIN_TYPES = %i[hash array binary text nil]
@@ -59,14 +58,13 @@ module Specdiff
       MSG
     end
 
-    ::Specdiff.plugins << plugin
+    @plugins << plugin
   end
 
   # private
   def self._clear_plugins!
-    threadlocal[THREADLOCAL_PLUGINS_KEY] = []
+    @plugins = []
   end
-  _clear_plugins!
 
   module Plugins
   end

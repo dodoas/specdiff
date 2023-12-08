@@ -7,11 +7,12 @@ RSpec.describe Specdiff do
     original_config = Specdiff.config.dup
 
     expect(Specdiff.config.colorize).to eq(false)
-    Specdiff.configure do |config|
+    configure_return = Specdiff.configure do |config|
       config.colorize = true
     end
 
     expect(Specdiff.config.colorize).to eq(true)
+    expect(configure_return).to eq(Specdiff.config)
   ensure
     Specdiff._set_config(original_config)
   end

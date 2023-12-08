@@ -5,23 +5,26 @@ module Specdiff
     end
   end
 
-  # Read the configuration
-  def self.config
-    threadlocal[:config] ||= default_configuration
+  class << self
+    attr_reader :config
   end
+
+  DEFAULT = Config.new(colorize: true).freeze
+  @config = DEFAULT.dup
 
   # private, used for testing
   def self._set_config(new_config)
-    threadlocal[:config] = new_config
+    @config = new_config
   end
 
   # Set the configuration
   def self.configure
-    yield(config)
+    yield(@config)
+    @config
   end
 
   # Generates the default configuration
   def self.default_configuration
-    Config.new(colorize: true)
+    DEFAULT
   end
 end
