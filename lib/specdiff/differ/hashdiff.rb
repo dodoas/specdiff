@@ -1,5 +1,4 @@
 require "hashdiff"
-require "pp"
 
 class Specdiff::Differ::Hashdiff
   extend ::Specdiff::Colorize
@@ -22,8 +21,6 @@ class Specdiff::Differ::Hashdiff
   end
 
   def self.stringify(diff)
-    diff.raw.pretty_inspect
-
     result = +""
 
     diff.raw.each do |change|
