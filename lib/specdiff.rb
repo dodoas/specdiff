@@ -1,11 +1,12 @@
 require_relative "specdiff/version"
 require_relative "specdiff/config"
 require_relative "specdiff/colorize"
+require_relative "specdiff/compare"
 
 module Specdiff
   # Diff two things
   def self.diff(...)
-    ::Specdiff::Differ.call(...)
+    ::Specdiff::Compare.call(...)
   end
 end
 

@@ -1,4 +1,4 @@
-raw diff
+"raw diff"
   the return value from a differ or plugin's #diff method
   this can be anything, from an array of arrays (hashdiff) to a string with a
   git diff inside
@@ -13,8 +13,8 @@ differ
   human-comprehensible diff output for your terminal
 
 plugin
-  external differ (responding to more methods), able to be provided by third
-  parties or end users themselves
+  external differ (has to respond to more methods)
+  may be provided from outside the gem (for example by a user drowning in xml)
 
 type
   a symbol like :text, :json or :hash which denotes the type of data in a way
@@ -25,9 +25,16 @@ type
   :text
     a string which likely contains plaintext data of some kind
 
+"plugin type"
+  a type added by loading a plugin (not shipped by default with specdiff)
+
 side
   an object containing a value and a type
 
   used to represent the two sides to a comparison
 
   when defining a plugin, you receive two sides: a and b, to various methods
+
+compare
+  the procedure that implements the main function of specdiff including
+  accounting for any plugin types and differs
