@@ -47,8 +47,10 @@ Specdiff.configure do |config|
 end
 ```
 
-The webmock patch should make webmock show diffs from the specdiff gem when
-stubs mismatch.
+### WebMock
+
+The webmock patch should make webmock show request body diffs by using the
+specdiff gem when stubs mismatch. It only applies to request bodies.
 
 ### Direct usage
 
