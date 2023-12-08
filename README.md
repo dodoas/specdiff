@@ -107,3 +107,12 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/odinhb
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## TODO
+
+This documents potential improvements/issues I know about or have thought about.
+
+- [ ] test the webmock monkey-patch. currently there is an empty webmock_spec.rb (should we do this using rspec?) and the examples/ directory contains a few webmock examples (which are a good idea to run before releasing) but it would be nice to have the pipeline fail if it doesn't work for whatever reason
+- [ ] finalize plugin interface (are the methods named intuitively? should we split type detector definitions and differ definitions?)
+- [ ] document how to define a plugin properly (instead of just linking to the source code)
+- [ ] is the stringification of hashdiff's output really better than pretty print? or just more wordy? (the colors are definitely nice)
