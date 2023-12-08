@@ -112,13 +112,18 @@ High level description of the heuristic specdiff implements
 
 ## Releasing
 
-### Pre-release checklist
+### Release procedure
 
   - [ ] unit tests are passing (`$ bundle exec rake test`)
   - [ ] linter is happy (`$ bundle exec rake lint`)
   - [ ] `$ cd examples/webmock && bundle install && bundle exec ruby json.rb` looks good
   - [ ] `$ bundle exec ruby text.rb` looks good
-  - [ ] Move unreleased changes to the next version in the [changelog](./CHANGELOG.md)
+  - [ ] update the version number in `version.rb`
+  - [ ] make sure the `examples/` `Gemfile.lock` files are updated
+  - [ ] move unreleased changes to the next version in the [changelog](./CHANGELOG.md)
+  - [ ] commit in the form "vX.X.X" and push
+  - [ ] make sure the pipeline is green
+  - [ ] `$ bundle exec rake release`
 
 To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
