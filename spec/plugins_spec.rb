@@ -34,7 +34,7 @@ RSpec.describe "plugins" do
     expect(result.to_s).to eq("my_custom_type_diff_output")
   end
 
-  it "get validated" do
+  it "validates methods implemented by plugins" do
     object = Object.new
     def object.inspect
       "<just_an_object>"
@@ -120,7 +120,6 @@ RSpec.describe "plugins" do
     expect(result.to_s).to eq("a is a different (ARRAY) than b D:")
   end
 
-  # this would undermine the utility of diff#empty?
   it "disallows registering a plugin for the :unknown type" do
     differ_of_unknowns = Class.new do
       include ::Specdiff::Plugin
