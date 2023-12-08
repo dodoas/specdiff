@@ -1,3 +1,8 @@
+raw diff
+  the return value from a differ or plugin's #diff method
+  this can be anything, from an array of arrays (hashdiff) to a string with a
+  git diff inside
+
 diff
   the return value from the Specdiff::diff method.
   this is not the direct return value from a plugin/differ, that is the
@@ -15,10 +20,14 @@ type
   a symbol like :text, :json or :hash which denotes the type of data in a way
   which is useful for picking a differ
 
+  a plugin returns a type from its #id method
+
   :text
     a string which likely contains plaintext data of some kind
 
 side
-  an object containing either side of a comparison that needs to be made
-  when defining a plugin, the diff method receives two sides: a, b
-  most importantly, a side contains a value and a type
+  an object containing a value and a type
+
+  used to represent the two sides to a comparison
+
+  when defining a plugin, you receive two sides: a and b, to various methods
