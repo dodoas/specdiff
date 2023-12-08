@@ -73,7 +73,7 @@ Specdiff.load!(:json)
 Specdiff.load!(MyCustomType)
 ```
 
-Check out the [source code](./lib/specdiff/plugins/json.rb) to learn the plugin interface.
+[Check out the source code](./lib/specdiff/plugins/json.rb) to learn the plugin interface.
 
 ## Development
 
@@ -89,6 +89,26 @@ Run `bundle exec rake -AD` for a full list of all the available tasks you may us
 You can also run `bin/console` for an interactive prompt that will allow you to experiment with the gem code loaded.
 
 Remember to update the unreleased section of the [changelog](./CHANGELOG.md) before you submit your pull request.
+
+## How it works/"Architecture"
+
+High level description of the heuristic specdiff implements
+
+  1. receive 2 pieces of data: `a` and `b`
+  2. determine types for `a` and `b`
+      1. test against plugin types
+      2. test against built in types
+      3. fall back to the `:unknown` type
+  3. determine which differ is appropriate for the types
+      1. test against plugin differs
+      2. test against built in differs
+      3. fall back to the null differ (`NotFound`)
+  7. run the selected differ with a and b
+  8. package it into a `::Specdiff::Diff` which records the detected types
+
+  \<time passes>
+
+  6. at some point later when `#to_s` is invoked, stringify the diff using the differ's `#stringify`
 
 ## Releasing
 

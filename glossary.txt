@@ -16,6 +16,12 @@ plugin
   external differ (has to respond to more methods)
   may be provided from outside the gem (for example by a user drowning in xml)
 
+"built in differ"
+  differ living in the specdiff/differ directory
+
+"built in plugin"
+  plugin shipped with the gem, but needs to be loaded using Specdiff.load!
+
 type
   a symbol like :text, :json or :hash which denotes the type of data in a way
   which is useful for picking a differ
@@ -26,7 +32,7 @@ type
     a string which likely contains plaintext data of some kind
 
 "plugin type"
-  a type added by loading a plugin (not shipped by default with specdiff)
+  a type added by loading a plugin (not built into specdiff)
 
 side
   an object containing a value and a type
