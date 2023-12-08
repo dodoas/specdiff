@@ -75,6 +75,9 @@ Check out the [source code](./lib/specdiff/plugins/json.rb) to learn the plugin 
 
 ## Development
 
+Check out the [glossary](./glossary.txt) to make sure you (and I) are using the
+same words for things ;)
+
 Install the software versions specified in `.tool-versions`.
 
 Run `bin/setup` to install dependencies. Then, run `bundle exec rake` to run the tests and linter and make sure they're green before starting to make your changes.
@@ -83,7 +86,17 @@ Run `bundle exec rake -AD` for a full list of all the available tasks you may us
 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment with the gem code loaded.
 
+Remember to update the unreleased section of the [changelog](./CHANGELOG.md) before you submit your pull request.
+
 ## Releasing
+
+### Pre-release checklist
+
+  - [ ] unit tests are passing (`$ bundle exec rake test`)
+  - [ ] linter is happy (`$ bundle exec rake lint`)
+  - [ ] `$ cd examples/webmock && bundle install && bundle exec ruby json.rb` looks good
+  - [ ] `$ bundle exec ruby text.rb` looks good
+  - [ ] Move unreleased changes to the next version in the [changelog](./CHANGELOG.md)
 
 To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
