@@ -1,5 +1,4 @@
 require_relative "specdiff/version"
-require_relative "specdiff/threadlocal"
 require_relative "specdiff/config"
 require_relative "specdiff/colorize"
 
