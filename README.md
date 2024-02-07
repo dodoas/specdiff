@@ -11,8 +11,6 @@ dropping the content type requirement.
 Specdiff automagically detects the types of provided data and prints a suitable
 diff between them.
 
-Check out the examples directory to see what it might look like.
-
 ## Cool, what does it look like?
 
 When specdiff is enabled, webmock will produce a generic text diff using
@@ -27,6 +25,10 @@ even if the request did not have the content type header:
 ![d](./assets/webmock_json_with_specdiff.png)
 
 (The output of the json diff is experimental, feedback would be great!)
+
+You might also check out the `examples/` directory to play with it:
+
+`$ cd examples/webmock && bundle install`
 
 ## Installation
 
