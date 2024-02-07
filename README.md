@@ -13,6 +13,21 @@ diff between them.
 
 Check out the examples directory to see what it might look like.
 
+## Cool, what does it look like?
+
+When specdiff is enabled, webmock will produce a generic text diff using
+[`Diff::LCS`](https://github.com/halostatue/diff-lcs) (basically the same
+diff as rspec uses):
+
+![webmock_text_with_specdiff](./assets/webmock_text_with_specdiff.png)
+
+It will also produce a json [hashdiff](https://github.com/liufengyun/hashdiff),
+even if the request did not have the content type header:
+
+![d](./assets/webmock_json_with_specdiff.png)
+
+(The output of the json diff is experimental, feedback would be great!)
+
 ## Installation
 
 Add this line to your application's Gemfile:
