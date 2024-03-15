@@ -15,10 +15,13 @@ class Specdiff::Differ::Text
     b_value = b.value
 
     if a_value.encoding != b_value.encoding
-      return <<~MSG
+      return colorize_by_line(<<~MSG) do |line|
         Strings have different encodings:
           #{a.value.encoding.inspect} != #{b.value.encoding.inspect}
       MSG
+        # makes it stand out a bit more from the red of rspec output
+        reset_color(line)
+      end
     end
 
     diff = ""
