@@ -25,7 +25,12 @@ module Specdiff::Colorize
     "\e[33m#{text}\e[0m"
   end
 
+  # this color may have bad contrast
   def blue(text)
     "\e[34m#{text}\e[0m"
+  end
+
+  def cyan(text)
+    "\e[36m#{text}\e[0m"
   end
 end

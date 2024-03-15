@@ -62,7 +62,7 @@ class Specdiff::Differ::Text
         red(line)
       when "@"
         if line[1].chr == "@"
-          blue(line)
+          cyan(line)
         else
           reset_color(line)
         end
