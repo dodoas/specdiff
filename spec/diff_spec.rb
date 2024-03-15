@@ -294,11 +294,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        changed b from 45 to 12
-        changed c[0] from :a to :c
-        changed c[2] from :c to :a
-        removed d.e.f[0] with value 34
-        changed d.g from :l to 6543234
+        b changed (45 => 12)
+        c[0] changed (:a => :c)
+        c[2] changed (:c => :a)
+        missing key: d.e.f[0] (34)
+        d.g changed (:l => 6543234)
       DIFF
     end
 
@@ -328,20 +328,20 @@ RSpec.describe "Specdiff" do
       # fact that there is nothing in common in large hashes and just provide
       # no diff in that case? since the diff is unlikely to be useful
       expect(result.to_s).to eq(<<~DIFF)
-        removed amount1 with value 34235
-        removed amount2 with value 4534
-        removed calculated_amount1 with value 45346
-        removed calculated_amount2 with value 5436345
-        removed status with value "filled"
-        removed total1 with value 45345
-        removed total2 with value 54621
-        added "CamelCase" with value "TaDa"
-        added "SCREAMING_SNAKE_CASE" with value "TA_DA"
-        added "UPPERCASE" with value "TADA"
-        added "kebab-case" with value "ta-da"
-        added "lowercase" with value "tada"
-        added "pascalCase" with value "taDa"
-        added "snake_case" with value "ta_da"
+        missing key: amount1 (34235)
+        missing key: amount2 (4534)
+        missing key: calculated_amount1 (45346)
+        missing key: calculated_amount2 (5436345)
+        missing key: status ("filled")
+        missing key: total1 (45345)
+        missing key: total2 (54621)
+        new key: "CamelCase" ("TaDa")
+        new key: "SCREAMING_SNAKE_CASE" ("TA_DA")
+        new key: "UPPERCASE" ("TADA")
+        new key: "kebab-case" ("ta-da")
+        new key: "lowercase" ("tada")
+        new key: "pascalCase" ("taDa")
+        new key: "snake_case" ("ta_da")
       DIFF
     end
 
@@ -354,10 +354,10 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        changed [0] from 1 to :one
-        changed [4] from 5 to "5"
-        changed [6] from 7 to 7.1
-        changed [7] from 8 to 8.0
+        [0] changed (1 => :one)
+        [4] changed (5 => "5")
+        [6] changed (7 => 7.1)
+        [7] changed (8 => 8.0)
       DIFF
     end
 
@@ -379,9 +379,9 @@ RSpec.describe "Specdiff" do
       result = diff(array1, array2)
 
       expect(result.to_s).to eq(<<~DIFF)
-        changed [0].t from 546 to 546.0
-        changed [1].hash1 from "2" to "22"
-        changed [2].n from 34 to 675
+        [0].t changed (546 => 546.0)
+        [1].hash1 changed ("2" => "22")
+        [2].n changed (34 => 675)
       DIFF
     end
 
@@ -392,8 +392,8 @@ RSpec.describe "Specdiff" do
       result = diff(array1, array2)
 
       expect(result.to_s).to eq(<<~DIFF)
-        changed [0] from :a to "a"
-        changed [2] from "c" to :c
+        [0] changed (:a => "a")
+        [2] changed ("c" => :c)
       DIFF
     end
 
@@ -404,8 +404,8 @@ RSpec.describe "Specdiff" do
       result = diff(hash1, hash2)
 
       expect(result.to_s).to eq(<<~DIFF)
-        removed test with value "yes"
-        added "test" with value "yes"
+        missing key: test ("yes")
+        new key: "test" ("yes")
       DIFF
     end
 
@@ -420,8 +420,8 @@ RSpec.describe "Specdiff" do
       result = diff(hash1, hash2)
 
       expect(result.to_s).to eq(<<~DIFF)
-        removed a."test" with value "1234"
-        added a.test with value "1234"
+        missing key: a."test" ("1234")
+        new key: a.test ("1234")
       DIFF
     end
 
@@ -438,10 +438,10 @@ RSpec.describe "Specdiff" do
       result = diff(array1, array2)
 
       expect(result.to_s).to eq(<<~DIFF)
-        removed [0].a with value "b"
-        removed [0]."c" with value :d
-        added [0]."a" with value "b"
-        added [0].c with value :d
+        missing key: [0].a ("b")
+        missing key: [0]."c" (:d)
+        new key: [0]."a" ("b")
+        new key: [0].c (:d)
       DIFF
     end
 

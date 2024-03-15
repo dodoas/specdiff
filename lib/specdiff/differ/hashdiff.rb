@@ -31,16 +31,16 @@ class Specdiff::Differ::Hashdiff
       if type == "+"
         value = change[2]
 
-        result << "added #{path2} with value #{value.inspect}"
+        result << "new key: #{path2} (#{value.inspect})"
       elsif type == "-"
         value = change[2]
 
-        result << "removed #{path2} with value #{value.inspect}"
+        result << "missing key: #{path2} (#{value.inspect})"
       elsif type == "~"
         from = change[2]
         to = change[3]
 
-        result << "changed #{path2} from #{from.inspect} to #{to.inspect}"
+        result << "#{path2} changed (#{from.inspect} => #{to.inspect})"
       else
         result << change.inspect
       end
@@ -49,11 +49,11 @@ class Specdiff::Differ::Hashdiff
     end
 
     colorize_by_line(result) do |line|
-      if line.start_with?("removed")
+      if line.start_with?("missing key:")
         red(line)
-      elsif line.start_with?("added")
+      elsif line.start_with?("new key:")
         green(line)
-      elsif line.start_with?("changed")
+      elsif line.include?("changed")
         yellow(line)
       else
         reset_color(line)

@@ -30,10 +30,10 @@ RSpec.describe "optional included json differ support" do
     expect(result.types).to eq([:hash, :hash])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      changed "key1" from 435 to 453
-      changed "key2" from "yes" to 342
-      changed "key3" from "bongo452" to "video"
-      changed "key5" from "present!" to nil
+      "key1" changed (435 => 453)
+      "key2" changed ("yes" => 342)
+      "key3" changed ("bongo452" => "video")
+      "key5" changed ("present!" => nil)
     DIFF
   end
 
@@ -72,9 +72,9 @@ RSpec.describe "optional included json differ support" do
     expect(result.types).to eq([:array, :array])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      changed [0] from 1 to {}
-      changed [2] from 3 to "3"
-      added [4] with value []
+      [0] changed (1 => {})
+      [2] changed (3 => "3")
+      new key: [4] ([])
     DIFF
   end
 
@@ -95,8 +95,8 @@ RSpec.describe "optional included json differ support" do
     expect(result1.types).to eq([:hash, :hash])
     expect(result1.empty?).to eq(false)
     expect(result1.to_s).to eq(<<~DIFF)
-      changed "my_hash" from "my hash" to "my (not) hash"
-      changed "this" from "is" to "isn't"
+      "my_hash" changed ("my hash" => "my (not) hash")
+      "this" changed ("is" => "isn't")
     DIFF
 
     result2 = diff(hash, json)
@@ -104,8 +104,8 @@ RSpec.describe "optional included json differ support" do
     expect(result2.types).to eq([:hash, :hash])
     expect(result2.empty?).to eq(false)
     expect(result2.to_s).to eq(<<~DIFF)
-      changed "my_hash" from "my (not) hash" to "my hash"
-      changed "this" from "isn't" to "is"
+      "my_hash" changed ("my (not) hash" => "my hash")
+      "this" changed ("isn't" => "is")
     DIFF
   end
 
