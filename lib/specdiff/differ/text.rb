@@ -28,10 +28,13 @@ class Specdiff::Differ::Text
 
     a_lines = a_value.split(NEWLINE).map! { _1.chomp }
     b_lines = b_value.split(NEWLINE).map! { _1.chomp }
+
+    file_length_difference = 0
+
     hunks = ::Diff::LCS.diff(a_lines, b_lines).map do |piece|
       ::Diff::LCS::Hunk.new(
-        a_lines, b_lines, piece, CONTEXT_LINES, 0,
-      )
+        a_lines, b_lines, piece, CONTEXT_LINES, file_length_difference,
+      ).tap { |hunk| file_length_difference = hunk.file_length_difference }
     end
 
     hunks.each_cons(2) do |prev_hunk, current_hunk|
@@ -39,7 +42,7 @@ class Specdiff::Differ::Text
         if current_hunk.overlaps?(prev_hunk)
           current_hunk.merge(prev_hunk)
         else
-          diff << prev_hunk.diff(:unified).to_s
+          diff << prev_hunk.diff(:unified)
         end
       ensure
         diff << NEWLINE
@@ -47,12 +50,14 @@ class Specdiff::Differ::Text
     end
 
     if hunks.last
-      diff << hunks.last.diff(:unified).to_s
+      diff << NEWLINE
+      diff << hunks.last.diff(:unified)
     end
 
     return diff if diff == ""
 
-    diff << "\n"
+    diff << NEWLINE
+    diff.lstrip!
 
     return colorize_by_line(diff) do |line|
       case line[0].chr

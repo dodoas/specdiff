@@ -45,8 +45,7 @@ RSpec.describe "Specdiff" do
       result = diff(txt1, txt2)
 
       expect(result.to_s).to eq(<<~DIFF)
-
-        @@ -1,7 +1,8 @@
+        @@ -1,9 +1,6 @@
          this
          is
         -some
@@ -55,7 +54,7 @@ RSpec.describe "Specdiff" do
         -will
         -be
         +the
-
+         changed
         +text
       DIFF
     end
@@ -112,6 +111,7 @@ RSpec.describe "Specdiff" do
         ipsum
         dolor
         sit
+
        @@ -16,5 +16,5 @@
         et
         dolore
@@ -161,8 +161,7 @@ RSpec.describe "Specdiff" do
         expect(result.types).to eq([:text, :text])
         expect(result.empty?).to eq(false)
         expect(result.to_s).to eq(<<~DIFF.encode("Windows-1252"))
-
-          @@ -1,7 +1,8 @@
+          @@ -1,9 +1,6 @@
            thøs
            is
           -søme
@@ -171,7 +170,7 @@ RSpec.describe "Specdiff" do
           -will
           -bø
           +thå
-
+           chånged
           +text
         DIFF
       end
@@ -221,7 +220,6 @@ RSpec.describe "Specdiff" do
         expect(result.types).to eq([:text, :text])
         expect(result.empty?).to eq(false)
         expect(result.to_s).to eq(<<~DIFF)
-
           @@ -1,6 +1,6 @@
           -text1
           +text2
