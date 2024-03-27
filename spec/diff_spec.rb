@@ -121,7 +121,7 @@ RSpec.describe "Specdiff" do
       DIFF
     end
 
-    it "produces an empty diff" do
+    it "produces an empty diff when two strings are the same" do
       txt1 = <<~TXT
         my
         text
@@ -130,6 +130,21 @@ RSpec.describe "Specdiff" do
         ;''
       TXT
       txt2 = txt1.dup
+
+      result = diff(txt1, txt2)
+
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq("")
+    end
+
+    # until we have word diffing it would be pointless to show a diff of this
+    it "produces an empty diff if both strings are a single line" do
+      txt1 = <<~TXT.chomp
+        abcdefg js css html hmlkjgf
+      TXT
+      txt2 = <<~TXT.chomp
+        vvv vvv js html css juletide
+      TXT
 
       result = diff(txt1, txt2)
 
@@ -263,7 +278,7 @@ RSpec.describe "Specdiff" do
   end
 
   describe "hashes and arrays" do
-    it "diffs hashes" do
+    it "diffs nested hashes where values change" do
       hash1 = {
         a: :b,
         b: 45,
@@ -292,11 +307,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        b changed (45 => 12)
-        c[0] changed (:a => :c)
-        c[2] changed (:c => :a)
         missing key: d.e.f[0] (34)
-        d.g changed (:l => 6543234)
+        changed key: b (45 -> 12)
+        changed key: c[0] (:a -> :c)
+        changed key: c[2] (:c -> :a)
+        changed key: d.g (:l -> 6543234)
       DIFF
     end
 
@@ -322,24 +337,476 @@ RSpec.describe "Specdiff" do
 
       result = diff(hash1, hash2)
 
-      # maybe there is an opportunity to make the diff intelligently detect the
-      # fact that there is nothing in common in large hashes and just provide
-      # no diff in that case? since the diff is unlikely to be useful
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        missing key: amount1 (34235)
-        missing key: amount2 (4534)
-        missing key: calculated_amount1 (45346)
-        missing key: calculated_amount2 (5436345)
-        missing key: status ("filled")
-        missing key: total1 (45345)
-        missing key: total2 (54621)
-        new key: "CamelCase" ("TaDa")
-        new key: "SCREAMING_SNAKE_CASE" ("TA_DA")
-        new key: "UPPERCASE" ("TADA")
-        new key: "kebab-case" ("ta-da")
-        new key: "lowercase" ("tada")
-        new key: "pascalCase" ("taDa")
-        new key: "snake_case" ("ta_da")
+        @@ -1,10 +1,10 @@
+         {
+        -  amount1: 34235,
+        -  amount2: 4534,
+        -  calculated_amount1: 45346,
+        -  calculated_amount2: 5436345,
+        -  total1: 45345,
+        -  total2: 54621,
+        -  status: "filled",
+        +  "UPPERCASE" => "TADA",
+        +  "lowercase" => "tada",
+        +  "CamelCase" => "TaDa",
+        +  "pascalCase" => "taDa",
+        +  "snake_case" => "ta_da",
+        +  "SCREAMING_SNAKE_CASE" => "TA_DA",
+        +  "kebab-case" => "ta-da",
+         }
+      DIFF
+    end
+
+    it "diffs nested hashes where empty compares against keys" do
+      hash1 = {
+        "slasher" => [
+          {
+            race: [
+              {}, {},
+            ],
+          },
+        ],
+      }
+      hash2 = {
+        "slasher" => [
+          {
+            tigress: 4,
+            coffee: "2029-01-01",
+            cavalry: nil,
+            exert: "AAA3",
+            pension: "2029-09-10",
+            thermal: "USD",
+            swung: 999,
+            tipping: "XY342",
+            uncombed: "AAA333AAA333AAA333",
+            tactical: "Barber boy",
+            thyself: "Evil Cackle",
+            race: [
+              {
+                gully: 2,
+                snarl: "dry",
+                avatar: nil,
+                bulge: 2104.92,
+                chosen: "AAA",
+              },
+              {
+                gully: 3,
+                snarl: "pony",
+                avatar: nil,
+                bulge: 2104.92,
+                chosen: "AAA",
+              },
+            ],
+            blitz: 4523.643,
+          },
+        ],
+        "late" => true,
+      }
+
+      result = diff(hash1, hash2)
+
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
+      expect(result.to_s).to eq(<<~DIFF)
+        @@ -1,13 +1,36 @@
+         {
+           "slasher" => [
+             {
+        +      tigress: 4,
+        +      coffee: "2029-01-01",
+        +      cavalry: nil,
+        +      exert: "AAA3",
+        +      pension: "2029-09-10",
+        +      thermal: "USD",
+        +      swung: 999,
+        +      tipping: "XY342",
+        +      uncombed: "AAA333AAA333AAA333",
+        +      tactical: "Barber boy",
+        +      thyself: "Evil Cackle",
+               race: [
+                 {
+        +          gully: 2,
+        +          snarl: "dry",
+        +          avatar: nil,
+        +          bulge: 2104.92,
+        +          chosen: "AAA",
+                 },
+                 {
+        +          gully: 3,
+        +          snarl: "pony",
+        +          avatar: nil,
+        +          bulge: 2104.92,
+        +          chosen: "AAA",
+                 },
+               ],
+        +      blitz: 4523.643,
+             },
+           ],
+        +  "late" => true,
+         }
+      DIFF
+    end
+
+    it "diffs nested hashes where all the keys change" do
+      hash1 = {
+        "slasher" => [
+          {
+            cruelness: 4,
+            stagnant: "2029-01-01",
+            uncooked: nil,
+            spinout: "AAA3",
+            favoring: "2029-09-10",
+            whinny: "USD",
+            ascertain: 999,
+            angriness: "XY342",
+            wobbly: "AAA333AAA333AAA333",
+            blooper: "Barber boy",
+            landowner: "Evil Cackle",
+            asleep: [
+              {
+                crispness: 2,
+                landless: "dry",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+              {
+                crispness: 3,
+                landless: "pony",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+            ],
+            creatable: 4523.643,
+          },
+        ],
+        "cupcake" => true,
+      }
+      hash2 = {
+        "slasher" => [
+          {
+            tigress: 4,
+            coffee: "2029-01-01",
+            cavalry: nil,
+            exert: "AAA3",
+            pension: "2029-09-10",
+            thermal: "USD",
+            swung: 999,
+            tipping: "XY342",
+            uncombed: "AAA333AAA333AAA333",
+            tactical: "Barber boy",
+            thyself: "Evil Cackle",
+            race: [
+              {
+                gully: 2,
+                snarl: "dry",
+                avatar: nil,
+                bulge: 2104.92,
+                chosen: "AAA",
+              },
+              {
+                gully: 3,
+                snarl: "pony",
+                avatar: nil,
+                bulge: 2104.92,
+                chosen: "AAA",
+              },
+            ],
+            blitz: 4523.643,
+          },
+        ],
+        "late" => true,
+      }
+
+      result = diff(hash1, hash2)
+
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
+      expect(result.to_s).to eq(<<~DIFF)
+        @@ -1,36 +1,36 @@
+         {
+           "slasher" => [
+             {
+        -      cruelness: 4,
+        -      stagnant: "2029-01-01",
+        -      uncooked: nil,
+        -      spinout: "AAA3",
+        -      favoring: "2029-09-10",
+        -      whinny: "USD",
+        -      ascertain: 999,
+        -      angriness: "XY342",
+        -      wobbly: "AAA333AAA333AAA333",
+        -      blooper: "Barber boy",
+        -      landowner: "Evil Cackle",
+        -      asleep: [
+        +      tigress: 4,
+        +      coffee: "2029-01-01",
+        +      cavalry: nil,
+        +      exert: "AAA3",
+        +      pension: "2029-09-10",
+        +      thermal: "USD",
+        +      swung: 999,
+        +      tipping: "XY342",
+        +      uncombed: "AAA333AAA333AAA333",
+        +      tactical: "Barber boy",
+        +      thyself: "Evil Cackle",
+        +      race: [
+                 {
+        -          crispness: 2,
+        -          landless: "dry",
+        -          surging: nil,
+        -          tattoo: 2104.92,
+        -          mama: "AAA",
+        +          gully: 2,
+        +          snarl: "dry",
+        +          avatar: nil,
+        +          bulge: 2104.92,
+        +          chosen: "AAA",
+                 },
+                 {
+        -          crispness: 3,
+        -          landless: "pony",
+        -          surging: nil,
+        -          tattoo: 2104.92,
+        -          mama: "AAA",
+        +          gully: 3,
+        +          snarl: "pony",
+        +          avatar: nil,
+        +          bulge: 2104.92,
+        +          chosen: "AAA",
+                 },
+               ],
+        -      creatable: 4523.643,
+        +      blitz: 4523.643,
+             },
+           ],
+        -  "cupcake" => true,
+        +  "late" => true,
+         }
+      DIFF
+    end
+
+    it "uses text diff when 5\% of the changes are value changes" do
+      hash1 = {
+        "slasher" => [
+          {
+            cruelness: 90001,
+            stagnant: "2029-01-02",
+            uncooked: "true",
+            spinout: "AAA4",
+            favoring: "2029-09-10",
+            whinny: "USD",
+            ascertain: 999,
+            angriness: "XY342",
+            wobbly: "RTHITHIRTO334",
+            blooper: "Barber boy",
+            landowner: "Evil Cackle",
+            asleep: [
+              {
+                crispness: 2,
+                landless: "dry",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+              {
+                crispness: 3,
+                landless: "pony",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+            ],
+            creatable: 4523.643,
+          },
+        ],
+        "cupcake" => true,
+      }
+      hash2 = {
+        "slasher" => [
+          {
+            payable: 90001,
+            street: "2029-01-02",
+            unsorted: "true",
+            bullpen: "AAA4",
+            favoring: "2029-09-10",
+            nuzzle: "USD",
+            ascertain: 999,
+            angriness: "XY342",
+            wobbly: "RTHITHIRTO334",
+            blooper: "Barber boy",
+            running: "Evil Cackle",
+            asleep: [
+              {
+                crispness: 2,
+                landless: "dry",
+                amperage: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+              {
+                crispness: 3,
+                landless: "pony",
+                amperage: nil,
+                tattoo: 2104.92,
+                mama: "ABA",
+              },
+            ],
+            banner: 4523.643,
+          },
+        ],
+      }
+
+      result = diff(hash1, hash2)
+
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
+      expect(result.to_s).to eq(<<~DIFF)
+        @@ -1,36 +1,35 @@
+         {
+           "slasher" => [
+             {
+        -      cruelness: 90001,
+        -      stagnant: "2029-01-02",
+        -      uncooked: "true",
+        -      spinout: "AAA4",
+        +      payable: 90001,
+        +      street: "2029-01-02",
+        +      unsorted: "true",
+        +      bullpen: "AAA4",
+               favoring: "2029-09-10",
+        -      whinny: "USD",
+        +      nuzzle: "USD",
+               ascertain: 999,
+               angriness: "XY342",
+               wobbly: "RTHITHIRTO334",
+               blooper: "Barber boy",
+        -      landowner: "Evil Cackle",
+        +      running: "Evil Cackle",
+               asleep: [
+                 {
+                   crispness: 2,
+                   landless: "dry",
+        -          surging: nil,
+        +          amperage: nil,
+                   tattoo: 2104.92,
+                   mama: "AAA",
+                 },
+                 {
+                   crispness: 3,
+                   landless: "pony",
+        -          surging: nil,
+        +          amperage: nil,
+                   tattoo: 2104.92,
+        -          mama: "AAA",
+        +          mama: "ABA",
+                 },
+               ],
+        -      creatable: 4523.643,
+        +      banner: 4523.643,
+             },
+           ],
+        -  "cupcake" => true,
+         }
+      DIFF
+    end
+
+    it "uses hashdiff when 33\% of the changes are value changes" do
+      hash1 = {
+        "slasher" => [
+          {
+            cruelness: 90001,
+            stagnant: "2029-01-01",
+            uncooked: "true",
+            spinout: "AAA4",
+            favoring: "2029-09-10",
+            whinny: "USD",
+            ascertain: 999,
+            angriness: "XY342",
+            aide: "RTHITHIRTO334",
+            blooper: "Barber boy",
+            landowner: "Evil Cackle",
+            asleep: [
+              {
+                crispness: 2,
+                landless: "dry",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+              {
+                crispness: 3,
+                landless: "pony",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+            ],
+            creatable: 4523.643,
+          },
+        ],
+        "cupcake" => true,
+      }
+      hash2 = {
+        "slasher" => [
+          {
+            cruelness: 2,
+            stagnant: "2029-01-02",
+            designing: "true",
+            eagle: "AAA4",
+            favoring: "2029-09-10",
+            whinny: "USD",
+            aide: "RTHITHIRTO334",
+            blooper: "Barber boy",
+            landowner: "Evil Cackle",
+            asleep: [
+              {
+                crispness: 22222,
+                bobsled: "dry",
+                surging: nil,
+                tattoo: 2104.92,
+                mama: "AAA",
+              },
+              {
+                crispness: 3333,
+                bobsled: "ponies",
+                surging: nil,
+                tattoo: 34.2,
+                mama: "AAA",
+              },
+            ],
+            creatable: 4523.643,
+          },
+        ],
+        "cupcake" => true,
+      }
+
+      result = diff(hash1, hash2)
+
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
+      expect(result.to_s).to eq(<<~DIFF)
+       missing key: "slasher"[0].angriness ("XY342")
+       missing key: "slasher"[0].ascertain (999)
+       missing key: "slasher"[0].spinout ("AAA4")
+       missing key: "slasher"[0].uncooked ("true")
+       missing key: "slasher"[0].asleep[0].landless ("dry")
+       missing key: "slasher"[0].asleep[1].landless ("pony")
+
+           new key: "slasher"[0].asleep[0].bobsled ("dry")
+           new key: "slasher"[0].asleep[1].bobsled ("ponies")
+           new key: "slasher"[0].designing ("true")
+           new key: "slasher"[0].eagle ("AAA4")
+
+       changed key: "slasher"[0].asleep[0].crispness (2 -> 22222)
+       changed key: "slasher"[0].asleep[1].crispness (3 -> 3333)
+       changed key: "slasher"[0].asleep[1].tattoo (2104.92 -> 34.2)
+       changed key: "slasher"[0].cruelness (90001 -> 2)
+       changed key: "slasher"[0].stagnant ("2029-01-01" -> "2029-01-02")
       DIFF
     end
 
@@ -352,10 +819,10 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        [0] changed (1 => :one)
-        [4] changed (5 => "5")
-        [6] changed (7 => 7.1)
-        [7] changed (8 => 8.0)
+        changed key: [0] (1 -> :one)
+        changed key: [4] (5 -> "5")
+        changed key: [6] (7 -> 7.1)
+        changed key: [7] (8 -> 8.0)
       DIFF
     end
 
@@ -376,10 +843,12 @@ RSpec.describe "Specdiff" do
 
       result = diff(array1, array2)
 
+      expect(result.types).to eq([:array, :array])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        [0].t changed (546 => 546.0)
-        [1].hash1 changed ("2" => "22")
-        [2].n changed (34 => 675)
+        changed key: [0].t (546 -> 546.0)
+        changed key: [1].hash1 ("2" -> "22")
+        changed key: [2].n (34 -> 675)
       DIFF
     end
 
@@ -389,57 +858,69 @@ RSpec.describe "Specdiff" do
 
       result = diff(array1, array2)
 
+      expect(result.types).to eq([:array, :array])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        [0] changed (:a => "a")
-        [2] changed ("c" => :c)
+        changed key: [0] (:a -> "a")
+        changed key: [2] ("c" -> :c)
       DIFF
     end
 
     it "differentiates symbols and strings in hash keys" do
-      hash1 = {test: "yes"}
-      hash2 = {"test" => "yes"}
+      hash1 = {test: "yes", "test" => "yess", "y" => 3}
+      hash2 = {"test" => "yes", test: "yess", x: 1}
 
       result = diff(hash1, hash2)
 
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        missing key: test ("yes")
-        new key: "test" ("yes")
+        missing key: "y" (3)
+            new key: x (1)
+        changed key: test ("yes" -> "yess")
+        changed key: "test" ("yess" -> "yes")
       DIFF
     end
 
     it "differentiates symbols and strings in nested hash keys" do
       hash1 = {
-        a: {"test" => "1234"},
+        a: {test: "1234", "test" => "12", "y" => 3},
       }
       hash2 = {
-        a: {test: "1234"},
+        a: {"test" => "1234", test: "12", x: 1},
       }
 
       result = diff(hash1, hash2)
 
+      expect(result.types).to eq([:hash, :hash])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        missing key: a."test" ("1234")
-        new key: a.test ("1234")
+        missing key: a."y" (3)
+            new key: a.x (1)
+        changed key: a.test ("1234" -> "12")
+        changed key: a."test" ("12" -> "1234")
       DIFF
     end
 
     it "differentiates symbols and strings in nested hash keys in arrays" do
       array1 = [
         {a: "b", "c" => :d},
-        {vegetate: "long"},
+        {"vegetate" => "long"},
       ]
       array2 = [
-        {"a" => "b", c: :d},
+        {a: "c", "c" => :v},
         {vegetate: "long"},
       ]
 
       result = diff(array1, array2)
 
+      expect(result.types).to eq([:array, :array])
+      expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        missing key: [0].a ("b")
-        missing key: [0]."c" (:d)
-        new key: [0]."a" ("b")
-        new key: [0].c (:d)
+        missing key: [1]."vegetate" ("long")
+            new key: [1].vegetate ("long")
+        changed key: [0].a ("b" -> "c")
+        changed key: [0]."c" (:d -> :v)
       DIFF
     end
 
@@ -455,6 +936,7 @@ RSpec.describe "Specdiff" do
 
       expect(result.empty?).to eq(true)
       expect(result.to_s).to eq("")
+      expect(result.types).to eq([:hash, :hash])
     end
 
     it "produces an empty diff from arrays" do
@@ -465,6 +947,7 @@ RSpec.describe "Specdiff" do
 
       expect(result.empty?).to eq(true)
       expect(result.to_s).to eq("")
+      expect(result.types).to eq([:array, :array])
     end
   end
 
@@ -490,7 +973,7 @@ RSpec.describe "Specdiff" do
 
       expect(result.types).to eq([:nil, :nil])
       expect(result.empty?).to eq(true)
-      expect(result.to_s).to eq("nil = nil")
+      expect(result.to_s).to eq("nil == nil")
     end
 
     it "array and hash" do
@@ -547,6 +1030,26 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:text, :hash])
       expect(result.empty?).to eq(true)
       expect(result.to_s).to eq('"hellope" != {:yes=>"this is phone"}')
+    end
+
+    it "booleans" do
+      result = diff(true, false)
+
+      expect(result.types).to eq([:unknown, :unknown])
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq('true != false')
+
+      result = diff(true, true)
+
+      expect(result.types).to eq([:unknown, :unknown])
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq('true == true')
+
+      result = diff(false, false)
+
+      expect(result.types).to eq([:unknown, :unknown])
+      expect(result.empty?).to eq(true)
+      expect(result.to_s).to eq('false == false')
     end
   end
 end

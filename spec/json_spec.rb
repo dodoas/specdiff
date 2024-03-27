@@ -30,25 +30,27 @@ RSpec.describe "optional included json differ support" do
     expect(result.types).to eq([:hash, :hash])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      "key1" changed (435 => 453)
-      "key2" changed ("yes" => 342)
-      "key3" changed ("bongo452" => "video")
-      "key5" changed ("present!" => nil)
+      changed key: "key1" (435 -> 453)
+      changed key: "key2" ("yes" -> 342)
+      changed key: "key3" ("bongo452" -> "video")
+      changed key: "key5" ("present!" -> nil)
     DIFF
   end
 
   it "diffs json strings" do
-    json1 = '"test json string"'
-    json2 = '"test json stirng"'
+    json1 = '"test\njson\nstring"'
+    json2 = '"test\njson\nstirng"'
 
     result = diff(json1, json2)
 
     expect(result.types).to eq([:text, :text])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      @@ -1 +1 @@
-      -test json string
-      +test json stirng
+       @@ -1,4 +1,4 @@
+        test
+        json
+       -string
+       +stirng
     DIFF
   end
 
@@ -72,9 +74,9 @@ RSpec.describe "optional included json differ support" do
     expect(result.types).to eq([:array, :array])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      [0] changed (1 => {})
-      [2] changed (3 => "3")
-      new key: [4] ([])
+          new key: [4] ([])
+      changed key: [0] (1 -> {})
+      changed key: [2] (3 -> "3")
     DIFF
   end
 
@@ -95,8 +97,8 @@ RSpec.describe "optional included json differ support" do
     expect(result1.types).to eq([:hash, :hash])
     expect(result1.empty?).to eq(false)
     expect(result1.to_s).to eq(<<~DIFF)
-      "my_hash" changed ("my hash" => "my (not) hash")
-      "this" changed ("is" => "isn't")
+      changed key: "my_hash" ("my hash" -> "my (not) hash")
+      changed key: "this" ("is" -> "isn't")
     DIFF
 
     result2 = diff(hash, json)
@@ -104,8 +106,8 @@ RSpec.describe "optional included json differ support" do
     expect(result2.types).to eq([:hash, :hash])
     expect(result2.empty?).to eq(false)
     expect(result2.to_s).to eq(<<~DIFF)
-      "my_hash" changed ("my (not) hash" => "my hash")
-      "this" changed ("isn't" => "is")
+      changed key: "my_hash" ("my (not) hash" -> "my hash")
+      changed key: "this" ("isn't" -> "is")
     DIFF
   end
 

@@ -1,4 +1,6 @@
+Bundler.require
 require "specdiff"
+require "specdiff/rspec" # dogfooding, be sure to turn this off when you break specdiff
 
 def fixture_path
   Pathname.new("#{__dir__}/fixtures")
@@ -21,4 +23,11 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+end
+
+class MyBasicObjectClass < BasicObject
+end
+
+class ConstantForTheSolePurposeOfUndefiningInspect
+  undef_method :inspect
 end

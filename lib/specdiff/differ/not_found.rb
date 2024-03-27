@@ -2,7 +2,7 @@
 class Specdiff::Differ::NotFound
   def self.diff(a, b)
     comparison = "!="
-    comparison = "=" if a.value == b.value
+    comparison = "==" if a.value == b.value
 
     a_representation = _representation_for(a)
     b_representation = _representation_for(b)

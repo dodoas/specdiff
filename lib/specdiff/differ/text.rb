@@ -26,6 +26,12 @@ class Specdiff::Differ::Text
 
     diff = ""
 
+    # if there are no newlines then the text differ doesn't produce any valuable
+    # output. "word diffing" would improve this case.
+    if a_value.count(NEWLINE) <= 1 && b_value.count(NEWLINE) <= 1
+      return diff
+    end
+
     a_lines = a_value.split(NEWLINE).map! { _1.chomp }
     b_lines = b_value.split(NEWLINE).map! { _1.chomp }
 
