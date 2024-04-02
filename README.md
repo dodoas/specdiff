@@ -133,10 +133,10 @@ High level description of the heuristic specdiff implements
 
   - [ ] unit tests are passing (`$ bundle exec rake test`)
   - [ ] linter is happy (`$ bundle exec rake lint`)
-  - [ ] `$ cd examples/webmock && bundle install && bundle exec ruby json.rb` looks good
-  - [ ] `$ bundle exec ruby text.rb` looks good
+  - [ ] `examples/` look good
   - [ ] update the version number in `version.rb`
-  - [ ] make sure the `examples/` `Gemfile.lock` files are updated
+  - [ ] make sure the `examples/` `Gemfile.lock` files are updated (run bundle install)
+  - [ ] make sure `Gemfile.lock` is updated (run bundle install)
   - [ ] move unreleased changes to the next version in the [changelog](./CHANGELOG.md)
   - [ ] commit in the form "vX.X.X" and push
   - [ ] make sure the pipeline is green

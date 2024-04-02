@@ -1,7 +1,7 @@
 PATH
   remote: ../..
   specs:
-    specdiff (0.2.0)
+    specdiff (0.3.0.pre.rc1)
       diff-lcs (~> 1.5)
       hashdiff (~> 1.0)
 
@@ -12,7 +12,7 @@ GEM
       public_suffix (>= 2.0.2, < 6.0)
     crack (0.4.5)
       rexml
-    diff-lcs (1.5.0)
+    diff-lcs (1.5.1)
     domain_name (0.6.20231109)
     ffi (1.16.3)
     ffi-compiler (1.0.1)
