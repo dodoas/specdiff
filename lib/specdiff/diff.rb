@@ -21,8 +21,10 @@
   def inspect
     if empty?
       "<Specdiff::Diff (empty)>"
-    else
+    elsif raw.respond_to?(:bytesize)
       "<Specdiff::Diff w/ #{raw&.bytesize || 0} bytes of #raw diff>"
+    else
+      "<Specdiff::Diff #{raw.inspect}>"
     end
   end
 end
