@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0-rc1]
+
 ### Added
 
 - Add rspec integration. `require "specdiff/rspec"` The rspec integration will cause rspec's differ to be replaced entirely with specdiff. It will also cause rspec's inspect (object formatter) to be replaced with Specdiff's inspect.
