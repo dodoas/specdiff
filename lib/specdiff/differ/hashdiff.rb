@@ -3,17 +3,67 @@ require "hashdiff"
 class Specdiff::Differ::Hashdiff
   extend ::Specdiff::Colorize
 
+  VALUE_CHANGE_PERCENTAGE_THRESHOLD = 0.2
+  TOTAL_CHANGES_FOR_GROUPING_THRESHOLD = 9
+
+  NEWLINE = "\n"
+
   def self.diff(a, b)
     # array_path: true returns the path as an array, which differentiates
     # between symbol keys and string keys in hashes, while the string
     # representation does not.
     # hmm it really seems like use_lcs: true gives much less human-readable
     # (human-comprehensible) output when arrays are involved.
-    ::Hashdiff.diff(
+    hashdiff_diff = ::Hashdiff.diff(
       a.value, b.value,
       array_path: true,
       use_lcs: false,
     )
+
+    return hashdiff_diff if hashdiff_diff.empty?
+
+    change_percentage = _calculate_change_percentage(hashdiff_diff)
+
+    if change_percentage >= VALUE_CHANGE_PERCENTAGE_THRESHOLD
+      hashdiff_diff
+    else
+      a_text = ::Specdiff.hashprint(a.value)
+      b_text = ::Specdiff.hashprint(b.value)
+
+      diff = ::Specdiff.diff(a_text, b_text)
+
+      if diff.empty?
+        []
+      else
+        diff.a.type = a.type
+        diff.b.type = b.type
+
+        diff
+      end
+    end
+  end
+
+  def self._calculate_change_percentage(hashdiff_diff)
+    value_change_count = hashdiff_diff.count { |element| element[0] == "~" }
+    addition_count = hashdiff_diff.count { |element| element[0] == "+" }
+    deletion_count = hashdiff_diff.count { |element| element[0] == "-" }
+    # puts "hashdiff_diff: #{hashdiff_diff.inspect}"
+    # puts "value_change_count: #{value_change_count.inspect}"
+    # puts "addition_count: #{addition_count.inspect}"
+    # puts "deletion_count: #{deletion_count.inspect}"
+
+    total_number_of_changes = [
+      value_change_count,
+      addition_count,
+      deletion_count,
+    ].sum
+
+    change_fraction = Rational(value_change_count, total_number_of_changes)
+    change_percentage = change_fraction.to_f
+    # puts "change_fraction: #{change_fraction.inspect}"
+    # puts "change_percentage: #{change_percentage.inspect}"
+
+    change_percentage
   end
 
   def self.empty?(diff)
@@ -23,37 +73,66 @@ class Specdiff::Differ::Hashdiff
   def self.stringify(diff)
     result = +""
 
-    diff.raw.each do |change|
-      type = change[0] # the char '+', '-' or '~'
-      path = change[1] # for example key1.key2[2] (as ["key1", :key2, 2])
-      path2 = _stringify_path(path)
+    total_changes = diff.raw.size
+    group_with_newlines = total_changes >= TOTAL_CHANGES_FOR_GROUPING_THRESHOLD
 
-      if type == "+"
-        value = change[2]
+    # hashdiff returns a structure like so:
+    # change[0] = '+', '-' or '~'. denoting type (addition, deletion or change)
+    # change[1] = the path to the change, in array form
+    # change[2] = the value, or the from value in case of '~'
+    # change[3] = the to value, only present when '~'
+    changes_grouped_by_type = diff.raw.group_by { |change| change[0] }
+    if (changes_grouped_by_type.keys - ["+", "-", "~"]).size > 0
+      $stderr.puts(
+        "Specdiff: hashdiff returned unexpected types: #{diff.raw.inspect}"
+      )
+    end
 
-        result << "new key: #{path2} (#{value.inspect})"
-      elsif type == "-"
-        value = change[2]
+    deletions = changes_grouped_by_type["-"] || []
+    additions = changes_grouped_by_type["+"] || []
+    value_changes = changes_grouped_by_type["~"] || []
 
-        result << "missing key: #{path2} (#{value.inspect})"
-      elsif type == "~"
-        from = change[2]
-        to = change[3]
+    deletions.each do |change|
+      value = change[2]
+      path = _stringify_path(change[1])
 
-        result << "#{path2} changed (#{from.inspect} => #{to.inspect})"
-      else
-        result << change.inspect
-      end
+      result << "missing key: #{path} (#{::Specdiff.diff_inspect(value)})"
+      result << NEWLINE
+    end
 
-      result << "\n"
+    if deletions.any? && additions.any? && group_with_newlines
+      result << NEWLINE
+    end
+
+    additions.each do |change|
+      value = change[2]
+      path = _stringify_path(change[1])
+
+      result << "    new key: #{path} (#{::Specdiff.diff_inspect(value)})"
+      result << NEWLINE
+    end
+
+    if additions.any? && value_changes.any? && group_with_newlines
+      result << NEWLINE
+    end
+
+    value_changes.each do |change|
+      from = change[2]
+      to = change[3]
+      path = _stringify_path(change[1])
+
+      from_inspected = ::Specdiff.diff_inspect(from)
+      to_inspected = ::Specdiff.diff_inspect(to)
+      result << "changed key: #{path} (#{from_inspected} -> #{to_inspected})"
+      result << NEWLINE
     end
 
     colorize_by_line(result) do |line|
       if line.start_with?("missing key:")
         red(line)
-      elsif line.start_with?("new key:")
+      elsif line.start_with?(/\s+new key:/)
         green(line)
-      elsif line.include?("changed")
+      elsif line.start_with?("changed key:")
         yellow(line)
       else
         reset_color(line)
