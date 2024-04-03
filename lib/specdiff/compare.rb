@@ -80,9 +80,9 @@ private
     elsif a.type == :text && b.type == :text
       Specdiff::Differ::Text
     elsif a.type == :hash && b.type == :hash
-      Specdiff::Differ::Hashdiff
+      Specdiff::Differ::Hash
     elsif a.type == :array && b.type == :array
-      Specdiff::Differ::Hashdiff
+      Specdiff::Differ::Hash
     else
       Specdiff::Differ::NotFound
     end

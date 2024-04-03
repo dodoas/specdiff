@@ -1,6 +1,6 @@
 require "hashdiff"
 
-class Specdiff::Differ::Hashdiff
+class Specdiff::Differ::Hash
   extend ::Specdiff::Colorize
 
   VALUE_CHANGE_PERCENTAGE_THRESHOLD = 0.2
