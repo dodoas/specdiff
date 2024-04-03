@@ -94,7 +94,7 @@ RSpec.describe "Specdiff::Hashprint" do
     TXT
   end
 
-  # this is actually a test of ::Specdiff.diff_inspect
+  # this is actually an integration test of ::Specdiff.diff_inspect
   it "prints ALL the types" do
     # object ids like 0x00007f1da833a4d8 that change every test run are not
     # practical, so you should assume any type not tested here returns whatever
@@ -129,6 +129,7 @@ RSpec.describe "Specdiff::Hashprint" do
       time: Time.new(2000, 1, 1, 5, 34, 1, "+02:00"),
       date: Date.new(1999, 12, 31),
       datetime: DateTime.new(2001, 2, 3, 4, 5, 6, "+0700"),
+      a_normal_class: Module,
       fallback_to_inspect: inspecty_boi,
       uninspectable1: basic_object,
       uninspectable2: inspect_was_undefd,
@@ -156,6 +157,7 @@ RSpec.describe "Specdiff::Hashprint" do
         time: #<Time: 2000-01-01 05:34:01 +0200>,
         date: #<Date: 1999-12-31>,
         datetime: #<DateTime: 2001-02-03T04:05:06+07:00>,
+        a_normal_class: Module,
         fallback_to_inspect: <Inspecty boi>,
         uninspectable1: #<uninspectable MyBasicObjectClass>,
         uninspectable2: #<uninspectable ConstantForTheSolePurposeOfUndefiningInspect>,
@@ -317,6 +319,108 @@ RSpec.describe "Specdiff::Hashprint" do
           {...},
           "ha",
         ],
+      }
+    TXT
+  end
+
+  it "prints hashes with they weirdest keys you've ever seen" do
+    alpha = [1, 2, 3]
+    beta = {a: alpha, b: []}
+    ceta = [alpha, beta, alpha]
+
+    # recursive structure
+    veta = {a: {}}
+    jeta = {v: veta}
+    veta[:b] = jeta
+
+    root = {
+      hashes: {
+        {} => {ya: "boi"},
+        {1 => 2} => [],
+        {2 => 3} => {},
+      },
+      arrays: {
+        [] => "empty :(",
+        [1] => [1, 2, 3],
+        ["hash"] => {},
+        ["hash2"] => {
+          oh_no: "lol",
+        },
+      },
+      classes: {
+        Module => true,
+        Class => false,
+        Time => :pls_no,
+        DateTime => Date,
+        Date => Time,
+      },
+      more_recursion_than_you_can_shake_a_stick_at: {
+        ceta => ceta,
+        veta => veta,
+      },
+    }
+
+    expect(call(root)).to eq(<<~TXT.chomp)
+      {
+        hashes: {
+          {} => {
+            ya: "boi",
+          },
+          {1=>2} => [
+          ],
+          {2=>3} => {
+          },
+        },
+        arrays: {
+          [] => "empty :(",
+          [1] => [
+            1,
+            2,
+            3,
+          ],
+          ["hash"] => {
+          },
+          ["hash2"] => {
+            oh_no: "lol",
+          },
+        },
+        classes: {
+          Module => true,
+          Class => false,
+          Time => :pls_no,
+          DateTime => Date,
+          Date => Time,
+        },
+        more_recursion_than_you_can_shake_a_stick_at: {
+          [[1, 2, 3], {:a=>[1, 2, 3], :b=>[]}, [1, 2, 3]] => [
+            [
+              1,
+              2,
+              3,
+            ],
+            {
+              a: [
+                1,
+                2,
+                3,
+              ],
+              b: [
+              ],
+            },
+            [
+              1,
+              2,
+              3,
+            ],
+          ],
+          {:a=>{}, :b=>{:v=>{...}}} => {
+            a: {
+            },
+            b: {
+              v: {...},
+            },
+          },
+        },
       }
     TXT
   end

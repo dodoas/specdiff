@@ -33,6 +33,24 @@ RSpec.describe "Specdiff::Inspect" do
     expect(call({m: :a, "l" => 5456})).to eq('{:m=>:a, "l"=>5456}')
   end
 
+  it "inspects weird keyed hash" do
+    expect(call({
+      Time => Date,
+      {} => {hash: "yes"},
+      {oh: 1} => 1,
+      [Date.new(1999, 1, 1)] => [],
+      [{}, {x: :y}] => {v: [:x, "y"]},
+      a: Array,
+    })).to eq(<<~TXT.chomp)
+      {Time=>Date, \
+      {}=>{:hash=>\"yes\"}, \
+      {:oh=>1}=>1, \
+      [#<Date: 1999-01-01>]=>[], \
+      [{}, {:x=>:y}]=>{:v=>[:x, \"y\"]}, \
+      :a=>Array}
+    TXT
+  end
+
   it "inspects empty array" do
     expect(call([])).to eq("[]")
   end

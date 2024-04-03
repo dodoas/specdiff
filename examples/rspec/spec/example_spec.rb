@@ -669,10 +669,26 @@ RSpec.describe "" do
       time: Time.new(2000, 1, 1, 5, 34, 1, "+02:00"),
       date: Date.new(1999, 12, 31),
       datetime: DateTime.new(2001, 2, 3, 4, 5, 6, "+0700"),
+      a_normal_class: Module,
       fallback_to_inspect: inspecty_boi,
       uninspectable1: basic_object,
       uninspectable2: inspect_was_undefd,
       uninspectable3: basic_object2,
+    }).to eq({})
+  end
+
+  it "very weird hash keys" do
+    my_cool_hash = {1 => 2, "yes" => :no}
+    an_ary = [1, 2, my_cool_hash, "whoa"]
+
+    expect({
+      Time => 1,
+      Date => 2,
+      Class.new => 3,
+      {} => :x,
+      my_cool_hash => my_cool_hash,
+      [] => an_ary,
+      [1, 2] => {x: ["d"]},
     }).to eq({})
   end
 end
