@@ -89,35 +89,32 @@ private
     @output << @indent unless this_indent_should_be_skipped
 
     @output << HASH_OPEN
-    # unless hash.empty?
-      @output << NEWLINE
+    @output << NEWLINE
 
-      increase_indentation
-      hash.each do |key, value|
-        @output << @indent
-
-        if key.is_a?(Symbol)
-          @output << key
-          @output << COLON
-          @output << SPACE
-        else
-          @output << ::Specdiff.diff_inspect(key)
-          @output << SPACE
-          @output << HASHROCKET
-          @output << SPACE
-        end
-
-        skip_next_opening_indent
-        output(value)
-
-        @output << COMMA
-        @output << NEWLINE
-      end
-      decrease_indentation
-
+    increase_indentation
+    hash.each do |key, value|
       @output << @indent
-    # end
 
+      if key.is_a?(Symbol)
+        @output << key
+        @output << COLON
+        @output << SPACE
+      else
+        @output << ::Specdiff.diff_inspect(key)
+        @output << SPACE
+        @output << HASHROCKET
+        @output << SPACE
+      end
+
+      skip_next_opening_indent
+      output(value)
+
+      @output << COMMA
+      @output << NEWLINE
+    end
+    decrease_indentation
+
+    @output << @indent
     @output << HASH_CLOSE
   end
 
@@ -128,21 +125,17 @@ private
     @output << @indent unless this_indent_should_be_skipped
 
     @output << ARRAY_OPEN
+    @output << NEWLINE
 
-    # unless array.empty?
+    increase_indentation
+    array.each do |element|
+      output(element)
+      @output << COMMA
       @output << NEWLINE
+    end
+    decrease_indentation
 
-      increase_indentation
-      array.each do |element|
-        output(element)
-        @output << COMMA
-        @output << NEWLINE
-      end
-      decrease_indentation
-
-      @output << @indent
-    # end
-
+    @output << @indent
     @output << ARRAY_CLOSE
   end
 
