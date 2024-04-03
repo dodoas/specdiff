@@ -259,4 +259,65 @@ RSpec.describe "Specdiff::Hashprint" do
       }
     TXT
   end
+
+  it "deals with array that contains itself" do
+    root = [Date.new(1911, 2, 10), 2, [], nil, {}]
+    layer12 = [Date.new(2011, 1, 1), "test", root]
+    layer11 = [2, layer12]
+    root[2] = layer11
+
+    layer21 = {x: "y", root: root}
+    root[4] = layer21
+
+    expect(call(root)).to eq(<<~TXT.chomp)
+      [
+        #<Date: 1911-02-10>,
+        2,
+        [
+          2,
+          [
+            #<Date: 2011-01-01>,
+            "test",
+            [...],
+          ],
+        ],
+        nil,
+        {
+          x: "y",
+          root: [...],
+        },
+      ]
+    TXT
+  end
+
+  it "deals with hash that contains itself" do
+    root = {ha: :ha, "ha" => "ha", date: Date.new(2024, 1, 1)}
+
+    layer12 = {root: root, date: Date.new(1923, 1, 1)}
+    layer11 = {layer12: layer12}
+    root[:oh_no] = layer11
+
+    layer21 = [nil, :x, root, "ha"]
+    root[:i_love_arrays] = layer21
+
+    expect(call(root)).to eq(<<~TXT.chomp)
+      {
+        ha: :ha,
+        "ha" => "ha",
+        date: #<Date: 2024-01-01>,
+        oh_no: {
+          layer12: {
+            root: {...},
+            date: #<Date: 1923-01-01>,
+          },
+        },
+        i_love_arrays: [
+          nil,
+          :x,
+          {...},
+          "ha",
+        ],
+      }
+    TXT
+  end
 end

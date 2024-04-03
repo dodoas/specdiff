@@ -13,6 +13,7 @@ class Specdiff::Hashprint
   NEWLINE = "\n".freeze
 
   def call(thing)
+    @recursion_trail = []
     @indentation_level = 0
     @indentation_per_level = SPACE * INDENTATION_SPACES
     @indent = ""
@@ -41,17 +42,6 @@ private
     recalculate_indent
   end
 
-  def with_indentation_level(temporary_level)
-    old_level = @indentation_level
-    @indentation_level = temporary_level
-    recalculate_indent
-
-    yield
-
-    @indentation_level = old_level
-    recalculate_indent
-  end
-
   def skip_next_opening_indent
     @skip_next_opening_indent = true
 
@@ -67,11 +57,24 @@ private
     end
   end
 
+  def track_recursion(thing)
+    @recursion_trail.push(thing)
+    result = yield
+    @recursion_trail.pop
+    result
+  end
+
+  def deja_vu?(current_place)
+    @recursion_trail.any? { |previous_place| previous_place == current_place }
+  end
+
   # #=== allows us to rely on Module implementing #=== instead of relying on the
   # thing (which could be any kind of wacky object) having to implement
   # #is_a? or #kind_of?
   def output(thing)
-    if Hash === thing
+    if deja_vu?(thing)
+      output_deja_vu(thing)
+    elsif Hash === thing
       output_hash(thing)
     elsif Array === thing
       output_array(thing)
@@ -92,25 +95,27 @@ private
     @output << NEWLINE
 
     increase_indentation
-    hash.each do |key, value|
-      @output << @indent
+    track_recursion(hash) do
+      hash.each do |key, value|
+        @output << @indent
 
-      if key.is_a?(Symbol)
-        @output << key
-        @output << COLON
-        @output << SPACE
-      else
-        @output << ::Specdiff.diff_inspect(key)
-        @output << SPACE
-        @output << HASHROCKET
-        @output << SPACE
+        if key.is_a?(Symbol)
+          @output << key
+          @output << COLON
+          @output << SPACE
+        else
+          @output << ::Specdiff.diff_inspect(key)
+          @output << SPACE
+          @output << HASHROCKET
+          @output << SPACE
+        end
+
+        skip_next_opening_indent
+        output(value)
+
+        @output << COMMA
+        @output << NEWLINE
       end
-
-      skip_next_opening_indent
-      output(value)
-
-      @output << COMMA
-      @output << NEWLINE
     end
     decrease_indentation
 
@@ -128,10 +133,12 @@ private
     @output << NEWLINE
 
     increase_indentation
-    array.each do |element|
-      output(element)
-      @output << COMMA
-      @output << NEWLINE
+    track_recursion(array) do
+      array.each do |element|
+        output(element)
+        @output << COMMA
+        @output << NEWLINE
+      end
     end
     decrease_indentation
 
@@ -143,5 +150,25 @@ private
     @output << @indent unless this_indent_should_be_skipped
 
     @output << ::Specdiff.diff_inspect(thing)
+  end
+
+  # The stdlib inspect code returns this when you have recursive structures.
+  STANDARD_INSPECT_RECURSIVE_ARRAY = "[...]".freeze
+  STANDARD_INSPECT_RECURSIVE_HASH = "{...}".freeze
+
+  def output_deja_vu(thing)
+    @output << @indent unless this_indent_should_be_skipped
+
+    case thing
+    when Array
+      # "#<Array ##{thing.object_id}>"
+      @output << STANDARD_INSPECT_RECURSIVE_ARRAY
+    when Hash
+      # "#<Hash ##{thing.object_id}>"
+      @output << STANDARD_INSPECT_RECURSIVE_HASH
+    else
+      # this should never happen
+      raise "Specdiff::Hashprint missing deja vu for: #{thing.inspect}"
+    end
   end
 end
