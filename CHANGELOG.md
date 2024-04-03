@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The RSpec integration now inspects hashes and arrays recursively. (Like rspec does by default)
+- RSpec integration no longer breaks description output of matchers when using multi matchers (like .all or .and)
 
 ## [0.3.0-rc1] - 2024-04-02
 
