@@ -14,19 +14,6 @@ end
 # This stops rspec from truncating strings w/ ellipsis, as well as making the
 # "inspect" output consistent with specdiff's.
 class RSpec::Support::ObjectFormatter
-  class SpecdiffCustomInspector < BaseInspector
-    def self.can_inspect?(_)
-      true
-    end
-
-    def inspect
-      ::Specdiff.diff_inspect(object)
-    end
-  end
-
-  remove_const("INSPECTOR_CLASSES")
-  const_set("INSPECTOR_CLASSES", [SpecdiffCustomInspector])
-
   def format(object)
     ::Specdiff.diff_inspect(object)
   end
