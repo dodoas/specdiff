@@ -1,4 +1,4 @@
-RSpec.describe "optional included json differ support" do
+RSpec.describe "json plugin" do
   def diff(...) = Specdiff.diff(...)
 
   before(:all) do
@@ -133,5 +133,40 @@ RSpec.describe "optional included json differ support" do
 
     expect(result.empty?).to eq(true)
     expect(result.to_s).to eq("")
+  end
+
+  # I don't think we want this thing to infinitely recurse into json
+  # structures to diff them.
+  it "only parses jsons one level deep" do
+    json1 = JSON.generate({x: "y"})
+    json2 = JSON.generate({l: json1})
+    json3 = JSON.generate({o: json2})
+    json4 = JSON.generate({x: "z"})
+
+    result = diff(json3, json4)
+    expect(result.empty?).to eq(false)
+    expect(result.to_s).to eq(<<~DIFF)
+      @@ -1,4 +1,4 @@
+       {
+      -  "o" => "{\\"l\\":\\"{\\\\\\"x\\\\\\":\\\\\\"y\\\\\\"}\\"}",
+      +  "x" => "z",
+       }
+    DIFF
+  end
+
+  it "only parses json strings one level deep" do
+    json1 = JSON.generate({x: "y"})
+    json2 = "\"#{json1}\""
+    json3 = "\"s\nl\nm\nba\""
+
+    result = diff(json2, json3)
+    expect(result.to_s).to eq(<<~DIFF)
+      @@ -1,4 +1,7 @@
+      -"{"x":"y"}"
+      +"s
+      +l
+      +m
+      +ba"
+    DIFF
   end
 end
