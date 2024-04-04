@@ -69,6 +69,7 @@ class Specdiff::Differ::Hash
 
   def self.stringify(diff)
     result = +""
+    return result if diff.empty?
 
     total_changes = diff.raw.size
     group_with_newlines = total_changes >= TOTAL_CHANGES_FOR_GROUPING_THRESHOLD
@@ -89,6 +90,9 @@ class Specdiff::Differ::Hash
     additions = changes_grouped_by_type["+"] || []
     value_changes = changes_grouped_by_type["~"] || []
 
+    result << "@@ +#{additions.size}/-#{deletions.size}/~#{value_changes.size} @@"
+    result << NEWLINE
+
     deletions.each do |change|
       value = change[2]
       path = _stringify_path(change[1])
@@ -105,7 +109,7 @@ class Specdiff::Differ::Hash
       value = change[2]
       path = _stringify_path(change[1])
 
-      result << "    new key: #{path} (#{::Specdiff.diff_inspect(value)})"
+      result << "  extra key: #{path} (#{::Specdiff.diff_inspect(value)})"
       result << NEWLINE
     end
 
@@ -120,17 +124,19 @@ class Specdiff::Differ::Hash
 
       from_inspected = ::Specdiff.diff_inspect(from)
       to_inspected = ::Specdiff.diff_inspect(to)
-      result << "changed key: #{path} (#{from_inspected} -> #{to_inspected})"
+      result << "  new value: #{path} (#{from_inspected} -> #{to_inspected})"
       result << NEWLINE
     end
 
     colorize_by_line(result) do |line|
       if line.start_with?("missing key:")
         red(line)
-      elsif line.start_with?(/\s+new key:/)
+      elsif line.start_with?("  extra key:")
         green(line)
-      elsif line.start_with?("changed key:")
+      elsif line.start_with?("  new value:")
         yellow(line)
+      elsif line.start_with?("@@")
+        cyan(line)
       else
         reset_color(line)
       end

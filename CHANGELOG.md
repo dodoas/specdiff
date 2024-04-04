@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rework how hashdiff's output gets printed.
+
 ### Fixed
 
 - The RSpec integration now inspects hashes and arrays recursively. (Like rspec does by default)

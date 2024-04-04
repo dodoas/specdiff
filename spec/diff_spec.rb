@@ -307,11 +307,12 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
+        @@ +0/-1/~4 @@
         missing key: d.e.f[0] (34)
-        changed key: b (45 -> 12)
-        changed key: c[0] (:a -> :c)
-        changed key: c[2] (:c -> :a)
-        changed key: d.g (:l -> 6543234)
+          new value: b (45 -> 12)
+          new value: c[0] (:a -> :c)
+          new value: c[2] (:c -> :a)
+          new value: d.g (:l -> 6543234)
       DIFF
     end
 
@@ -789,23 +790,24 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-       missing key: "slasher"[0].angriness ("XY342")
-       missing key: "slasher"[0].ascertain (999)
-       missing key: "slasher"[0].spinout ("AAA4")
-       missing key: "slasher"[0].uncooked ("true")
-       missing key: "slasher"[0].asleep[0].landless ("dry")
-       missing key: "slasher"[0].asleep[1].landless ("pony")
+        @@ +4/-6/~5 @@
+        missing key: "slasher"[0].angriness ("XY342")
+        missing key: "slasher"[0].ascertain (999)
+        missing key: "slasher"[0].spinout ("AAA4")
+        missing key: "slasher"[0].uncooked ("true")
+        missing key: "slasher"[0].asleep[0].landless ("dry")
+        missing key: "slasher"[0].asleep[1].landless ("pony")
 
-           new key: "slasher"[0].asleep[0].bobsled ("dry")
-           new key: "slasher"[0].asleep[1].bobsled ("ponies")
-           new key: "slasher"[0].designing ("true")
-           new key: "slasher"[0].eagle ("AAA4")
+          extra key: "slasher"[0].asleep[0].bobsled ("dry")
+          extra key: "slasher"[0].asleep[1].bobsled ("ponies")
+          extra key: "slasher"[0].designing ("true")
+          extra key: "slasher"[0].eagle ("AAA4")
 
-       changed key: "slasher"[0].asleep[0].crispness (2 -> 22222)
-       changed key: "slasher"[0].asleep[1].crispness (3 -> 3333)
-       changed key: "slasher"[0].asleep[1].tattoo (2104.92 -> 34.2)
-       changed key: "slasher"[0].cruelness (90001 -> 2)
-       changed key: "slasher"[0].stagnant ("2029-01-01" -> "2029-01-02")
+          new value: "slasher"[0].asleep[0].crispness (2 -> 22222)
+          new value: "slasher"[0].asleep[1].crispness (3 -> 3333)
+          new value: "slasher"[0].asleep[1].tattoo (2104.92 -> 34.2)
+          new value: "slasher"[0].cruelness (90001 -> 2)
+          new value: "slasher"[0].stagnant ("2029-01-01" -> "2029-01-02")
       DIFF
     end
 
@@ -818,10 +820,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        changed key: [0] (1 -> :one)
-        changed key: [4] (5 -> "5")
-        changed key: [6] (7 -> 7.1)
-        changed key: [7] (8 -> 8.0)
+        @@ +0/-0/~4 @@
+          new value: [0] (1 -> :one)
+          new value: [4] (5 -> "5")
+          new value: [6] (7 -> 7.1)
+          new value: [7] (8 -> 8.0)
       DIFF
     end
 
@@ -845,9 +848,10 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        changed key: [0].t (546 -> 546.0)
-        changed key: [1].hash1 ("2" -> "22")
-        changed key: [2].n (34 -> 675)
+        @@ +0/-0/~3 @@
+          new value: [0].t (546 -> 546.0)
+          new value: [1].hash1 ("2" -> "22")
+          new value: [2].n (34 -> 675)
       DIFF
     end
 
@@ -860,8 +864,9 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        changed key: [0] (:a -> "a")
-        changed key: [2] ("c" -> :c)
+        @@ +0/-0/~2 @@
+          new value: [0] (:a -> "a")
+          new value: [2] ("c" -> :c)
       DIFF
     end
 
@@ -874,10 +879,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
+        @@ +1/-1/~2 @@
         missing key: "y" (3)
-            new key: x (1)
-        changed key: test ("yes" -> "yess")
-        changed key: "test" ("yess" -> "yes")
+          extra key: x (1)
+          new value: test ("yes" -> "yess")
+          new value: "test" ("yess" -> "yes")
       DIFF
     end
 
@@ -894,10 +900,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
+        @@ +1/-1/~2 @@
         missing key: a."y" (3)
-            new key: a.x (1)
-        changed key: a.test ("1234" -> "12")
-        changed key: a."test" ("12" -> "1234")
+          extra key: a.x (1)
+          new value: a.test ("1234" -> "12")
+          new value: a."test" ("12" -> "1234")
       DIFF
     end
 
@@ -916,10 +923,11 @@ RSpec.describe "Specdiff" do
       expect(result.types).to eq([:array, :array])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
+        @@ +1/-1/~2 @@
         missing key: [1]."vegetate" ("long")
-            new key: [1].vegetate ("long")
-        changed key: [0].a ("b" -> "c")
-        changed key: [0]."c" (:d -> :v)
+          extra key: [1].vegetate ("long")
+          new value: [0].a ("b" -> "c")
+          new value: [0]."c" (:d -> :v)
       DIFF
     end
 

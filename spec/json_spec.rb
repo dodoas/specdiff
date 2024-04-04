@@ -29,10 +29,11 @@ RSpec.describe "json plugin" do
 
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      changed key: "key1" (435 -> 453)
-      changed key: "key2" ("yes" -> 342)
-      changed key: "key3" ("bongo452" -> "video")
-      changed key: "key5" ("present!" -> nil)
+      @@ +0/-0/~4 @@
+        new value: "key1" (435 -> 453)
+        new value: "key2" ("yes" -> 342)
+        new value: "key3" ("bongo452" -> "video")
+        new value: "key5" ("present!" -> nil)
     DIFF
     expect(result.types).to eq([:hash, :hash])
   end
@@ -110,9 +111,10 @@ RSpec.describe "json plugin" do
     expect(result.types).to eq([:array, :array])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-          new key: [4] ([])
-      changed key: [0] (1 -> {})
-      changed key: [2] (3 -> "3")
+      @@ +1/-0/~2 @@
+        extra key: [4] ([])
+        new value: [0] (1 -> {})
+        new value: [2] (3 -> "3")
     DIFF
   end
 
@@ -133,8 +135,9 @@ RSpec.describe "json plugin" do
     expect(result1.types).to eq([:hash, :hash])
     expect(result1.empty?).to eq(false)
     expect(result1.to_s).to eq(<<~DIFF)
-      changed key: "my_hash" ("my hash" -> "my (not) hash")
-      changed key: "this" ("is" -> "isn't")
+      @@ +0/-0/~2 @@
+        new value: "my_hash" ("my hash" -> "my (not) hash")
+        new value: "this" ("is" -> "isn't")
     DIFF
 
     result2 = diff(hash, json)
@@ -142,8 +145,9 @@ RSpec.describe "json plugin" do
     expect(result2.types).to eq([:hash, :hash])
     expect(result2.empty?).to eq(false)
     expect(result2.to_s).to eq(<<~DIFF)
-      changed key: "my_hash" ("my (not) hash" -> "my hash")
-      changed key: "this" ("isn't" -> "is")
+      @@ +0/-0/~2 @@
+        new value: "my_hash" ("my (not) hash" -> "my hash")
+        new value: "this" ("isn't" -> "is")
     DIFF
   end
 
