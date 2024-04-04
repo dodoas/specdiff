@@ -27,7 +27,6 @@ RSpec.describe "json plugin" do
 
     result = diff(json1, json2)
 
-    expect(result.types).to eq([:hash, :hash])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
       changed key: "key1" (435 -> 453)
@@ -35,6 +34,43 @@ RSpec.describe "json plugin" do
       changed key: "key3" ("bongo452" -> "video")
       changed key: "key5" ("present!" -> nil)
     DIFF
+    expect(result.types).to eq([:hash, :hash])
+  end
+
+  it "diffs json where key names change" do
+    json1 = {
+      confused: true,
+      unintelligible: true,
+      mixture: true,
+      seemingly: true,
+      intellectual: true,
+    }.to_json
+    json2 = {
+      confusinated: true,
+      unintelligibleh: true,
+      mixd: true,
+      seems: true,
+      intellectual: true,
+    }.to_json
+
+    result = diff(json1, json2)
+
+    expect(result.empty?).to eq(false)
+    expect(result.to_s).to eq(<<~DIFF)
+       @@ -1,8 +1,8 @@
+        {
+       -  "confused" => true,
+       -  "unintelligible" => true,
+       -  "mixture" => true,
+       -  "seemingly" => true,
+       +  "confusinated" => true,
+       +  "unintelligibleh" => true,
+       +  "mixd" => true,
+       +  "seems" => true,
+          "intellectual" => true,
+        }
+    DIFF
+    expect(result.types).to eq([:text, :text])
   end
 
   it "diffs json strings" do
