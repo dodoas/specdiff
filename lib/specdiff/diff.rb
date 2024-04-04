@@ -19,12 +19,15 @@
   end
 
   def inspect
-    if empty?
-      "<Specdiff::Diff (empty)>"
-    elsif raw.respond_to?(:bytesize)
-      "<Specdiff::Diff w/ #{raw&.bytesize || 0} bytes of #raw diff>"
-    else
-      "<Specdiff::Diff #{raw.inspect}>"
-    end
+    raw_diff = if empty?
+                 "empty"
+               elsif differ == ::Specdiff::Differ::Text
+                 bytes = raw&.bytesize || 0
+                 "#{bytes} bytes of #raw diff"
+               else
+                 "#{raw.inspect}"
+               end
+
+    "<Specdiff::Diff (#{a.type}/#{b.type}) (#{differ}) (#{raw_diff})>"
   end
 end
