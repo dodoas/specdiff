@@ -168,25 +168,6 @@ RSpec.describe "" do
 
         expect(s1).to eq(s2)
       end
-
-      describe "multi matcher" do
-        it ".and" do
-          expect("s\nn\nl\n").to eq("k\ntl")
-            .and(eq("s\ne\nl"))
-        end
-
-        it ".or" do
-          expect("s\nn\nl\n").to eq("k\ntl")
-            .or(eq("s\ne\nl"))
-        end
-
-        it ".all" do
-          expect([
-            "s\nn\nl",
-            "v\nd\nl",
-          ]).to all(eq("j\no\nh"))
-        end
-      end
     end
 
     describe "hashes" do
@@ -631,64 +612,94 @@ RSpec.describe "" do
     end
   end
 
-  # inspect integration test
-  it "all the types" do
-    # object ids like 0x00007f1da833a4d8 that change every test run are not
-    # practical, so you should assume any type not tested here returns whatever
-    # #inspect gives
-    inspecty_boi = Object.new
-    def inspecty_boi.inspect
-      "<Inspecty boi>"
+  describe "inspect output" do
+    it "all the types" do
+      # object ids like 0x00007f1da833a4d8 that change every test run are not
+      # practical, so you should assume any type not tested here returns whatever
+      # #inspect gives
+      inspecty_boi = Object.new
+      def inspecty_boi.inspect
+        "<Inspecty boi>"
+      end
+
+      # these don't have an #inspect
+      basic_object = MyBasicObjectClass.new
+      inspect_was_undefd = ConstantForTheSolePurposeOfUndefiningInspect.new
+
+      basic_object2_klass = Class.new(BasicObject)
+      basic_object2 = basic_object2_klass.new
+
+      expect({
+        string: "string HO \"",
+        "symbol" => :lol,
+        symbol: :symbol,
+        regex: /lo?([a-d])l/i,
+        int: 2,
+        float: 2.45,
+        infinity_plus: Float::INFINITY,
+        infinity_minus: -Float::INFINITY,
+        nan: Float::NAN,
+        big_number_yo: 95_023_569_498_234_210_594_598_234_509_320_923_450_893_425,
+        rational: Rational("2/12"),
+        bigdecimal: BigDecimal("45462345.62346452342342131353467899991112454"),
+        nothing: nil,
+        truth: true,
+        falsehood: false,
+        array: [],
+        hash: {},
+        time: Time.new(2000, 1, 1, 5, 34, 1, "+02:00"),
+        date: Date.new(1999, 12, 31),
+        datetime: DateTime.new(2001, 2, 3, 4, 5, 6, "+0700"),
+        a_normal_class: Module,
+        fallback_to_inspect: inspecty_boi,
+        uninspectable1: basic_object,
+        uninspectable2: inspect_was_undefd,
+        uninspectable3: basic_object2,
+      }).to eq({})
     end
 
-    # these don't have an #inspect
-    basic_object = MyBasicObjectClass.new
-    inspect_was_undefd = ConstantForTheSolePurposeOfUndefiningInspect.new
+    it "very weird hash keys" do
+      my_cool_hash = {1 => 2, "yes" => :no}
+      an_ary = [1, 2, my_cool_hash, "whoa"]
 
-    basic_object2_klass = Class.new(BasicObject)
-    basic_object2 = basic_object2_klass.new
-
-    expect({
-      string: "string HO \"",
-      "symbol" => :lol,
-      symbol: :symbol,
-      regex: /lo?([a-d])l/i,
-      int: 2,
-      float: 2.45,
-      infinity_plus: Float::INFINITY,
-      infinity_minus: -Float::INFINITY,
-      nan: Float::NAN,
-      big_number_yo: 95_023_569_498_234_210_594_598_234_509_320_923_450_893_425,
-      rational: Rational("2/12"),
-      bigdecimal: BigDecimal("45462345.62346452342342131353467899991112454"),
-      nothing: nil,
-      truth: true,
-      falsehood: false,
-      array: [],
-      hash: {},
-      time: Time.new(2000, 1, 1, 5, 34, 1, "+02:00"),
-      date: Date.new(1999, 12, 31),
-      datetime: DateTime.new(2001, 2, 3, 4, 5, 6, "+0700"),
-      a_normal_class: Module,
-      fallback_to_inspect: inspecty_boi,
-      uninspectable1: basic_object,
-      uninspectable2: inspect_was_undefd,
-      uninspectable3: basic_object2,
-    }).to eq({})
+      expect({
+        Time => 1,
+        Date => 2,
+        Class.new => 3,
+        {} => :x,
+        my_cool_hash => my_cool_hash,
+        [] => an_ary,
+        [1, 2] => {x: ["d"]},
+      }).to eq({})
+    end
   end
 
-  it "very weird hash keys" do
-    my_cool_hash = {1 => 2, "yes" => :no}
-    an_ary = [1, 2, my_cool_hash, "whoa"]
+  describe 'situations where rspec matchers get "inspected"' do
+    it "match([have_attributes(...), have_attributes(...), ...])" do
+      alpha = Struct.new(:a)
 
-    expect({
-      Time => 1,
-      Date => 2,
-      Class.new => 3,
-      {} => :x,
-      my_cool_hash => my_cool_hash,
-      [] => an_ary,
-      [1, 2] => {x: ["d"]},
-    }).to eq({})
+      expect([alpha.new(2), alpha.new(4)]).to match([
+        have_attributes(a: 3),
+        have_attributes(a: 6),
+        have_attributes(a: 4),
+      ])
+    end
+
+    it ".and" do
+      expect("s\nn\nl\n").to eq("k\ntl")
+        .and(eq("s\ne\nl"))
+    end
+
+    it ".or" do
+      expect("s\nn\nl\n").to eq("k\ntl")
+        .or(eq("s\ne\nl"))
+    end
+
+    it ".all" do
+      expect([
+        "s\nn\nl",
+        "v\nd\nl",
+      ]).to all(eq("j\no\nh"))
+    end
   end
 end

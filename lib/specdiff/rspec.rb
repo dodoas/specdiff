@@ -1,3 +1,6 @@
+raise "rspec must be required before specdiff/rspec!" unless defined?(RSpec)
+raise "RSpec::Support is missing????" unless defined?(RSpec::Support)
+
 class RSpec::Support::Differ
   alias old_diff diff
 
@@ -15,12 +18,9 @@ end
 # "inspect" output consistent with specdiff's.
 class RSpec::Support::ObjectFormatter
   def format(object)
-    # Turns out rspec uses it's crazy inspection logic for printing matcher
-    # descriptions when using multiple matchers with .all, .or or .and.
-    if ::RSpec::Support.is_a_matcher?(object) && object.respond_to?(:description)
-      return object.description
-    end
-
     ::Specdiff.diff_inspect(object)
   end
 end
+
+# marker for successfully loading this integration
+class Specdiff::RSpecIntegration; end # rubocop: disable Lint/EmptyClass

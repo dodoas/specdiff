@@ -24,6 +24,12 @@ class Specdiff::Inspect
       "#<Date: #{thing.strftime(DATE_FORMAT)}>"
     elsif defined?(BigDecimal) && BigDecimal === thing
       "#<BigDecimal: #{thing.to_s('F')}>"
+    elsif rspec_matcher?(thing)
+      # Turns out rspec depends on the recursion in its inspection logic to
+      # print the "description" of rspec matchers, in situations such as when
+      # using multi-matchers (.all, .or or .and), or when nesting them inside
+      # eachother (such as match([have_attributes(...)])).
+      thing.description
     else
       begin
         thing.inspect
@@ -31,6 +37,12 @@ class Specdiff::Inspect
         inspect_anyway(thing)
       end
     end
+  end
+
+  private def rspec_matcher?(thing)
+    defined?(::Specdiff::RSpecIntegration) &&
+      ::RSpec::Support.is_a_matcher?(thing) &&
+      thing.respond_to?(:description)
   end
 
   private def inspect_anyway(uninspectable)

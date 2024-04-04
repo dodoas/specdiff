@@ -1,5 +1,4 @@
-require "hashdiff"
-require "json"
+raise "webmock must be required before specdiff/webmock" unless defined?(WebMock)
 
 module WebMock
   class RequestBodyDiff
@@ -39,3 +38,6 @@ module WebMock
     end
   end
 end
+
+# marker for successfully loading this integration
+class Specdiff::WebmockIntegration; end # rubocop: disable Lint/EmptyClass
