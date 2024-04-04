@@ -337,7 +337,8 @@ RSpec.describe "Specdiff" do
 
       result = diff(hash1, hash2)
 
-      expect(result.types).to eq([:hash, :hash])
+      expect(result.types).to eq([:text, :text])
+
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
         @@ -1,10 +1,10 @@
@@ -408,7 +409,7 @@ RSpec.describe "Specdiff" do
 
       result = diff(hash1, hash2)
 
-      expect(result.types).to eq([:hash, :hash])
+      expect(result.types).to eq([:text, :text])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
         @@ -1,13 +1,36 @@
@@ -524,7 +525,6 @@ RSpec.describe "Specdiff" do
 
       result = diff(hash1, hash2)
 
-      expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
         @@ -1,36 +1,36 @@
@@ -663,7 +663,6 @@ RSpec.describe "Specdiff" do
 
       result = diff(hash1, hash2)
 
-      expect(result.types).to eq([:hash, :hash])
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
         @@ -1,36 +1,35 @@

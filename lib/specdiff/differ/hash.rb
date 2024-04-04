@@ -30,15 +30,12 @@ class Specdiff::Differ::Hash
       a_text = ::Specdiff.hashprint(a.value)
       b_text = ::Specdiff.hashprint(b.value)
 
-      diff = ::Specdiff.diff(a_text, b_text)
+      text_diff = ::Specdiff.diff(a_text, b_text)
 
-      if diff.empty?
+      if text_diff.empty?
         []
       else
-        diff.a.type = a.type
-        diff.b.type = b.type
-
-        diff
+        text_diff
       end
     end
   end
