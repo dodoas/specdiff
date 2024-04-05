@@ -134,6 +134,7 @@ High level description of the heuristic specdiff implements
   - [ ] unit tests are passing (`$ bundle exec rake test`)
   - [ ] linter is happy (`$ bundle exec rake lint`)
   - [ ] `examples/` look good
+  - [ ] check the package size using `$ bundle exec inspect_build`, make sure you haven't added any large files by accident
   - [ ] update the version number in `version.rb`
   - [ ] make sure the `examples/` `Gemfile.lock` files are updated (run bundle install)
   - [ ] make sure `Gemfile.lock` is updated (run bundle install)
@@ -141,8 +142,6 @@ High level description of the heuristic specdiff implements
   - [ ] commit in the form "vX.X.X" and push
   - [ ] make sure the pipeline is green
   - [ ] `$ bundle exec rake release`
-
-To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
