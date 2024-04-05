@@ -3,10 +3,13 @@ require "hashdiff"
 class Specdiff::Differ::Hash
   extend ::Specdiff::Colorize
 
-  VALUE_CHANGE_PERCENTAGE_THRESHOLD = 0.2
-  TOTAL_CHANGES_FOR_GROUPING_THRESHOLD = 9
+  # The percentage of changes that must (potentially) be a key rename in a hash
+  # for text diffing to kick in. Expressed as a fraction of 1.
+  KEY_CHANGE_PERCENTAGE_THRESHOLD = 0.8
 
-  NEWLINE = "\n"
+  # The number of changes that must be detected by hashdiff before we print some
+  # extra newlines to better group extra/missing/new_values visually.
+  TOTAL_CHANGES_FOR_GROUPING_THRESHOLD = 9
 
   def self.diff(a, b)
     # array_path: true returns the path as an array, which differentiates
@@ -24,7 +27,7 @@ class Specdiff::Differ::Hash
 
     change_percentage = _calculate_change_percentage(hashdiff_diff)
 
-    if change_percentage >= VALUE_CHANGE_PERCENTAGE_THRESHOLD
+    if change_percentage <= KEY_CHANGE_PERCENTAGE_THRESHOLD
       hashdiff_diff
     else
       a_text = ::Specdiff.hashprint(a.value)
@@ -41,31 +44,39 @@ class Specdiff::Differ::Hash
   end
 
   def self._calculate_change_percentage(hashdiff_diff)
-    value_change_count = hashdiff_diff.count { |element| element[0] == "~" }
-    addition_count = hashdiff_diff.count { |element| element[0] == "+" }
-    deletion_count = hashdiff_diff.count { |element| element[0] == "-" }
+    extra_keys = hashdiff_diff.count { |element| element[0] == "+" }
+    missing_keys = hashdiff_diff.count { |element| element[0] == "-" }
+    new_values = hashdiff_diff.count { |element| element[0] == "~" }
     # puts "hashdiff_diff: #{hashdiff_diff.inspect}"
-    # puts "value_change_count: #{value_change_count.inspect}"
-    # puts "addition_count: #{addition_count.inspect}"
-    # puts "deletion_count: #{deletion_count.inspect}"
+    # puts "extra_keys: #{extra_keys.inspect}"
+    # puts "missing_keys: #{missing_keys.inspect}"
+    # puts "new_values: #{new_values.inspect}"
 
-    total_number_of_changes = [
-      value_change_count,
-      addition_count,
-      deletion_count,
-    ].sum
+    potential_changed_keys = [extra_keys, missing_keys].min
+    adjusted_extra_keys = extra_keys - potential_changed_keys
+    adjusted_missing_keys = missing_keys - potential_changed_keys
+    # puts "potential_changed_keys: #{potential_changed_keys.inspect}"
+    # puts "adjusted_extra_keys: #{adjusted_extra_keys.inspect}"
+    # puts "adjusted_missing_keys: #{adjusted_missing_keys.inspect}"
 
-    change_fraction = Rational(value_change_count, total_number_of_changes)
-    change_percentage = change_fraction.to_f
-    # puts "change_fraction: #{change_fraction.inspect}"
-    # puts "change_percentage: #{change_percentage.inspect}"
+    non_changed_keys = adjusted_extra_keys + adjusted_missing_keys + new_values
+    total_changes = non_changed_keys + potential_changed_keys
+    # puts "non_changed_keys: #{non_changed_keys.inspect}"
+    # puts "total_changes: #{total_changes.inspect}"
 
-    change_percentage
+    key_change_fraction = Rational(potential_changed_keys, total_changes)
+    key_change_percentage = key_change_fraction.to_f
+    # puts "key_change_fraction: #{key_change_fraction.inspect}"
+    # puts "key_change_percentage: #{key_change_percentage.inspect}"
+
+    key_change_percentage
   end
 
   def self.empty?(diff)
     diff.raw.empty?
   end
+
+  NEWLINE = "\n"
 
   def self.stringify(diff)
     result = +""

@@ -362,7 +362,7 @@ RSpec.describe "Specdiff" do
       DIFF
     end
 
-    it "diffs nested hashes where empty compares against keys" do
+    it "uses hashdiff on nested hashes w/ only extra or missing keys" do
       hash1 = {
         "slasher" => [
           {
@@ -408,51 +408,68 @@ RSpec.describe "Specdiff" do
         "late" => true,
       }
 
-      result = diff(hash1, hash2)
+      result1 = diff(hash1, hash2)
 
-      expect(result.types).to eq([:text, :text])
-      expect(result.empty?).to eq(false)
-      expect(result.to_s).to eq(<<~DIFF)
-        @@ -1,13 +1,36 @@
-         {
-           "slasher" => [
-             {
-        +      tigress: 4,
-        +      coffee: "2029-01-01",
-        +      cavalry: nil,
-        +      exert: "AAA3",
-        +      pension: "2029-09-10",
-        +      thermal: "USD",
-        +      swung: 999,
-        +      tipping: "XY342",
-        +      uncombed: "AAA333AAA333AAA333",
-        +      tactical: "Barber boy",
-        +      thyself: "Evil Cackle",
-               race: [
-                 {
-        +          gully: 2,
-        +          snarl: "dry",
-        +          avatar: nil,
-        +          bulge: 2104.92,
-        +          chosen: "AAA",
-                 },
-                 {
-        +          gully: 3,
-        +          snarl: "pony",
-        +          avatar: nil,
-        +          bulge: 2104.92,
-        +          chosen: "AAA",
-                 },
-               ],
-        +      blitz: 4523.643,
-             },
-           ],
-        +  "late" => true,
-         }
+      expect(result1.to_s).to eq(<<~DIFF)
+        @@ +23/-0/~0 @@
+          extra key: "slasher"[0].race[0].avatar (nil)
+          extra key: "slasher"[0].race[0].bulge (2104.92)
+          extra key: "slasher"[0].race[0].chosen ("AAA")
+          extra key: "slasher"[0].race[0].gully (2)
+          extra key: "slasher"[0].race[0].snarl ("dry")
+          extra key: "slasher"[0].race[1].avatar (nil)
+          extra key: "slasher"[0].race[1].bulge (2104.92)
+          extra key: "slasher"[0].race[1].chosen ("AAA")
+          extra key: "slasher"[0].race[1].gully (3)
+          extra key: "slasher"[0].race[1].snarl ("pony")
+          extra key: "slasher"[0].blitz (4523.643)
+          extra key: "slasher"[0].cavalry (nil)
+          extra key: "slasher"[0].coffee ("2029-01-01")
+          extra key: "slasher"[0].exert ("AAA3")
+          extra key: "slasher"[0].pension ("2029-09-10")
+          extra key: "slasher"[0].swung (999)
+          extra key: "slasher"[0].tactical ("Barber boy")
+          extra key: "slasher"[0].thermal ("USD")
+          extra key: "slasher"[0].thyself ("Evil Cackle")
+          extra key: "slasher"[0].tigress (4)
+          extra key: "slasher"[0].tipping ("XY342")
+          extra key: "slasher"[0].uncombed ("AAA333AAA333AAA333")
+          extra key: "late" (true)
       DIFF
+      expect(result1.empty?).to eq(false)
+
+      result2 = diff(hash2, hash1)
+
+      expect(result2.to_s).to eq(<<~DIFF)
+        @@ +0/-23/~0 @@
+        missing key: "late" (true)
+        missing key: "slasher"[0].blitz (4523.643)
+        missing key: "slasher"[0].cavalry (nil)
+        missing key: "slasher"[0].coffee ("2029-01-01")
+        missing key: "slasher"[0].exert ("AAA3")
+        missing key: "slasher"[0].pension ("2029-09-10")
+        missing key: "slasher"[0].swung (999)
+        missing key: "slasher"[0].tactical ("Barber boy")
+        missing key: "slasher"[0].thermal ("USD")
+        missing key: "slasher"[0].thyself ("Evil Cackle")
+        missing key: "slasher"[0].tigress (4)
+        missing key: "slasher"[0].tipping ("XY342")
+        missing key: "slasher"[0].uncombed ("AAA333AAA333AAA333")
+        missing key: "slasher"[0].race[0].avatar (nil)
+        missing key: "slasher"[0].race[0].bulge (2104.92)
+        missing key: "slasher"[0].race[0].chosen ("AAA")
+        missing key: "slasher"[0].race[0].gully (2)
+        missing key: "slasher"[0].race[0].snarl ("dry")
+        missing key: "slasher"[0].race[1].avatar (nil)
+        missing key: "slasher"[0].race[1].bulge (2104.92)
+        missing key: "slasher"[0].race[1].chosen ("AAA")
+        missing key: "slasher"[0].race[1].gully (3)
+        missing key: "slasher"[0].race[1].snarl ("pony")
+      DIFF
+      expect(result2.empty?).to eq(false)
     end
 
-    it "diffs nested hashes where all the keys change" do
+    it "uses text diff on nested hashes where all the keys change" do
       hash1 = {
         "slasher" => [
           {

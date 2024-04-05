@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Rework how hashdiff's output gets printed.
+- Rework switching heuristic between text diff/hashdiff in hash differ.
 
 ### Fixed
 
