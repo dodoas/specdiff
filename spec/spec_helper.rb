@@ -75,3 +75,11 @@ end
 class ConstantForTheSolePurposeOfUndefiningInspect
   undef_method :inspect
 end
+
+def measure_runtime
+  t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second)
+  yield
+  t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second)
+
+  t1 - t0
+end

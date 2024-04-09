@@ -15,8 +15,13 @@ class Specdiff::Differ::Hash
     # array_path: true returns the path as an array, which differentiates
     # between symbol keys and string keys in hashes, while the string
     # representation does not.
+
     # hmm it really seems like use_lcs: true gives much less human-readable
     # (human-comprehensible) output when arrays are involved.
+
+    # use_lcs: true may also cause Hashdiff to use a lot of memory when BIG
+    # arrays are involved: https://github.com/liufengyun/hashdiff/issues/49
+    # so we might as well avoid that problem altogether.
     hashdiff_diff = ::Hashdiff.diff(
       a.value, b.value,
       array_path: true,

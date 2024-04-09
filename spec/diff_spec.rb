@@ -1020,6 +1020,25 @@ RSpec.describe "Specdiff" do
       expect(result.to_s).to eq("")
       expect(result.types).to eq([:array, :array])
     end
+
+    # performance test, this makes sure that hashdiff's performance problems
+    # are not encountered: https://github.com/liufengyun/hashdiff/issues/49
+    it "really big arrays" do
+      a = [nil] * 17_000
+      b = [:nil] * 17_000
+
+      result = nil
+      runtime = measure_runtime do
+        result = diff(a, b)
+      end
+
+      expect(result.to_s).not_to eq("")
+      expect(result.to_s.size).to be > (100_000)
+      expect(result.empty?).to eq(false)
+      expect(result.types).to eq([:array, :array])
+
+      expect(runtime).to be < (0.3) # seconds
+    end
   end
 
   describe "refusing to diff" do
