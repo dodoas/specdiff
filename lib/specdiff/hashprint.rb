@@ -17,7 +17,7 @@ class Specdiff::Hashprint
     @indentation_level = 0
     @indentation_per_level = SPACE * INDENTATION_SPACES
     @indent = ""
-    @skip_next_opening_indent = false
+    @next_value_is_hash_value = false
 
     @output = StringIO.new
 
@@ -42,15 +42,15 @@ private
     recalculate_indent
   end
 
-  def skip_next_opening_indent
-    @skip_next_opening_indent = true
+  def next_value_is_hash_value
+    @next_value_is_hash_value = true
 
     nil
   end
 
-  def this_indent_should_be_skipped
-    if @skip_next_opening_indent
-      @skip_next_opening_indent = false
+  def outputting_hash_value?
+    if @next_value_is_hash_value
+      @next_value_is_hash_value = false
       true
     else
       false
@@ -89,7 +89,7 @@ private
   COLON = ":".freeze
 
   def output_hash(hash)
-    @output << @indent unless this_indent_should_be_skipped
+    @output << @indent unless outputting_hash_value?
 
     @output << HASH_OPEN
     @output << NEWLINE
@@ -111,7 +111,7 @@ private
             @output << SPACE
           end
 
-          skip_next_opening_indent
+          next_value_is_hash_value
           output(value)
 
           @output << COMMA
@@ -134,7 +134,7 @@ private
   ARRAY_CLOSE = "]".freeze
 
   def output_array(array)
-    @output << @indent unless this_indent_should_be_skipped
+    @output << @indent unless outputting_hash_value?
 
     @output << ARRAY_OPEN
     @output << NEWLINE
@@ -154,7 +154,7 @@ private
   end
 
   def output_unknown(thing)
-    @output << @indent unless this_indent_should_be_skipped
+    @output << @indent unless outputting_hash_value?
 
     @output << ::Specdiff.diff_inspect(thing)
   end
@@ -164,7 +164,7 @@ private
   STANDARD_INSPECT_RECURSIVE_HASH = "{...}".freeze
 
   def output_deja_vu(thing)
-    @output << @indent unless this_indent_should_be_skipped
+    @output << @indent unless outputting_hash_value?
 
     case thing
     when Array
