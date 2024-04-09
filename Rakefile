@@ -59,6 +59,9 @@ class MakeBytesReadable
   end
 end
 
+# 30kB is enough for anyone...
+MAX_BYTES_IN_BUILD = 30_000
+
 desc <<~DESC
   Check how big the ruby gem is when packaged. This helps you avoid pushing \
   bloated packages with unneccessary files in them.
@@ -85,6 +88,21 @@ task :inspect_build do
   puts
   rm output_path
   rm_r unpacking_directory
+
+  if bytes > MAX_BYTES_IN_BUILD
+    puts <<~MSG
+      == ! ==
+
+        The build has grown in size!
+        Did you accidentally add some unneccessary files?
+
+           MAX_BYTES_IN_BUILD: #{MAX_BYTES_IN_BUILD}
+        bytes in actual build: #{bytes}
+
+      == ! ==
+    MSG
+    exit 1
+  end
 end
 
 desc "Run some of the release procedure automatically (that which is automatable)"
