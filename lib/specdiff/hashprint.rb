@@ -96,31 +96,38 @@ private
 
     increase_indentation
     track_recursion(hash) do
-      hash.each do |key, value|
-        @output << @indent
+      try_to_sort(hash)
+        .each do |key, value|
+          @output << @indent
 
-        if key.is_a?(Symbol)
-          @output << key
-          @output << COLON
-          @output << SPACE
-        else
-          @output << ::Specdiff.diff_inspect(key)
-          @output << SPACE
-          @output << HASHROCKET
-          @output << SPACE
+          if key.is_a?(Symbol)
+            @output << key
+            @output << COLON
+            @output << SPACE
+          else
+            @output << ::Specdiff.diff_inspect(key)
+            @output << SPACE
+            @output << HASHROCKET
+            @output << SPACE
+          end
+
+          skip_next_opening_indent
+          output(value)
+
+          @output << COMMA
+          @output << NEWLINE
         end
-
-        skip_next_opening_indent
-        output(value)
-
-        @output << COMMA
-        @output << NEWLINE
-      end
     end
     decrease_indentation
 
     @output << @indent
     @output << HASH_CLOSE
+  end
+
+  def try_to_sort(hash)
+    return hash unless hash.keys.all? { |k| String === k || Symbol === k }
+
+    hash.sort_by { |k, _v| k.to_s }
   end
 
   ARRAY_OPEN = "[".freeze

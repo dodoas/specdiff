@@ -322,18 +322,18 @@ RSpec.describe "Specdiff" do
         amount2: 4534,
         calculated_amount1: 45346,
         calculated_amount2: 5436345,
+        status: "filled",
         total1: 45345,
         total2: 54621,
-        status: "filled",
       }
       hash2 = {
-        "UPPERCASE" => "TADA",
-        "lowercase" => "tada",
         "CamelCase" => "TaDa",
+        "SCREAMING_SNAKE_CASE" => "TA_DA",
+        "UPPERCASE" => "TADA",
+        "kebab-case" => "ta-da",
+        "lowercase" => "tada",
         "pascalCase" => "taDa",
         "snake_case" => "ta_da",
-        "SCREAMING_SNAKE_CASE" => "TA_DA",
-        "kebab-case" => "ta-da",
       }
 
       result = diff(hash1, hash2)
@@ -348,17 +348,65 @@ RSpec.describe "Specdiff" do
         -  amount2: 4534,
         -  calculated_amount1: 45346,
         -  calculated_amount2: 5436345,
+        -  status: "filled",
         -  total1: 45345,
         -  total2: 54621,
-        -  status: "filled",
-        +  "UPPERCASE" => "TADA",
-        +  "lowercase" => "tada",
         +  "CamelCase" => "TaDa",
+        +  "SCREAMING_SNAKE_CASE" => "TA_DA",
+        +  "UPPERCASE" => "TADA",
+        +  "kebab-case" => "ta-da",
+        +  "lowercase" => "tada",
         +  "pascalCase" => "taDa",
         +  "snake_case" => "ta_da",
-        +  "SCREAMING_SNAKE_CASE" => "TA_DA",
-        +  "kebab-case" => "ta-da",
          }
+      DIFF
+    end
+
+    it "sorts hashes before diffing them when they have symbol/string keys" do
+      hash1 = {
+        key1: "x",
+        key2: "x",
+        key3: "x",
+        key4: "x",
+        key5: "x",
+        key6: "x",
+        key7: "x",
+      }
+      hash2 = {
+        key3: "x",
+        key6: "x",
+        key7: "x",
+        key10: "y",
+        key4: "x",
+        key2: "x",
+        key5: "x",
+      }
+
+      result1 = diff(hash1, hash2)
+
+      expect(result1.to_s).to eq(<<~DIFF)
+        @@ -1,5 +1,5 @@
+         {
+        -  key1: "x",
+        +  key10: "y",
+           key2: "x",
+           key3: "x",
+           key4: "x",
+      DIFF
+      expect(result1.empty?).to eq(false)
+      expect(result1.types).to eq([:text, :text])
+
+      stringify_keys = ->(h) { h.map { |k, v| [k.to_s, v] }.to_h }
+
+      result2 = diff(stringify_keys.call(hash1), stringify_keys.call(hash2))
+      expect(result2.to_s).to eq(<<~DIFF)
+        @@ -1,5 +1,5 @@
+         {
+        -  "key1" => "x",
+        +  "key10" => "y",
+           "key2" => "x",
+           "key3" => "x",
+           "key4" => "x",
       DIFF
     end
 
@@ -471,210 +519,210 @@ RSpec.describe "Specdiff" do
 
     it "uses text diff on nested hashes where all the keys change" do
       hash1 = {
+        "cupcake" => true,
         "slasher" => [
           {
-            cruelness: 4,
-            stagnant: "2029-01-01",
-            uncooked: nil,
-            spinout: "AAA3",
-            favoring: "2029-09-10",
-            whinny: "USD",
-            ascertain: 999,
             angriness: "XY342",
-            wobbly: "AAA333AAA333AAA333",
-            blooper: "Barber boy",
-            landowner: "Evil Cackle",
+            ascertain: 999,
             asleep: [
               {
                 crispness: 2,
                 landless: "dry",
+                mama: "AAA",
                 surging: nil,
                 tattoo: 2104.92,
-                mama: "AAA",
               },
               {
                 crispness: 3,
                 landless: "pony",
+                mama: "AAA",
                 surging: nil,
                 tattoo: 2104.92,
-                mama: "AAA",
               },
             ],
+            blooper: "Barber boy",
             creatable: 4523.643,
+            cruelness: 4,
+            favoring: "2029-09-10",
+            landowner: "Evil Cackle",
+            spinout: "AAA3",
+            stagnant: "2029-01-01",
+            uncooked: nil,
+            whinny: "USD",
+            wobbly: "AAA333AAA333AAA333",
           },
         ],
-        "cupcake" => true,
       }
       hash2 = {
+        "late" => true,
         "slasher" => [
           {
-            tigress: 4,
-            coffee: "2029-01-01",
+            blitz: 4523.643,
             cavalry: nil,
+            coffee: "2029-01-01",
             exert: "AAA3",
             pension: "2029-09-10",
-            thermal: "USD",
-            swung: 999,
-            tipping: "XY342",
-            uncombed: "AAA333AAA333AAA333",
-            tactical: "Barber boy",
-            thyself: "Evil Cackle",
             race: [
               {
+                avatar: nil,
+                bulge: 2104.92,
+                chosen: "AAA",
                 gully: 2,
                 snarl: "dry",
-                avatar: nil,
-                bulge: 2104.92,
-                chosen: "AAA",
               },
               {
-                gully: 3,
-                snarl: "pony",
                 avatar: nil,
                 bulge: 2104.92,
                 chosen: "AAA",
+                gully: 3,
+                snarl: "pony",
               },
             ],
-            blitz: 4523.643,
+            swung: 999,
+            tactical: "Barber boy",
+            thermal: "USD",
+            thyself: "Evil Cackle",
+            tigress: 4,
+            tipping: "XY342",
+            uncombed: "AAA333AAA333AAA333",
           },
         ],
-        "late" => true,
       }
 
       result = diff(hash1, hash2)
 
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        @@ -1,36 +1,36 @@
+        @@ -1,35 +1,35 @@
          {
+        -  "cupcake" => true,
+        +  "late" => true,
            "slasher" => [
              {
-        -      cruelness: 4,
-        -      stagnant: "2029-01-01",
-        -      uncooked: nil,
-        -      spinout: "AAA3",
-        -      favoring: "2029-09-10",
-        -      whinny: "USD",
-        -      ascertain: 999,
         -      angriness: "XY342",
-        -      wobbly: "AAA333AAA333AAA333",
-        -      blooper: "Barber boy",
-        -      landowner: "Evil Cackle",
+        -      ascertain: 999,
         -      asleep: [
-        +      tigress: 4,
-        +      coffee: "2029-01-01",
+        +      blitz: 4523.643,
         +      cavalry: nil,
+        +      coffee: "2029-01-01",
         +      exert: "AAA3",
         +      pension: "2029-09-10",
-        +      thermal: "USD",
-        +      swung: 999,
-        +      tipping: "XY342",
-        +      uncombed: "AAA333AAA333AAA333",
-        +      tactical: "Barber boy",
-        +      thyself: "Evil Cackle",
         +      race: [
                  {
         -          crispness: 2,
         -          landless: "dry",
+        -          mama: "AAA",
         -          surging: nil,
         -          tattoo: 2104.92,
-        -          mama: "AAA",
-        +          gully: 2,
-        +          snarl: "dry",
         +          avatar: nil,
         +          bulge: 2104.92,
         +          chosen: "AAA",
+        +          gully: 2,
+        +          snarl: "dry",
                  },
                  {
         -          crispness: 3,
         -          landless: "pony",
+        -          mama: "AAA",
         -          surging: nil,
         -          tattoo: 2104.92,
-        -          mama: "AAA",
-        +          gully: 3,
-        +          snarl: "pony",
         +          avatar: nil,
         +          bulge: 2104.92,
         +          chosen: "AAA",
+        +          gully: 3,
+        +          snarl: "pony",
                  },
                ],
+        -      blooper: "Barber boy",
         -      creatable: 4523.643,
-        +      blitz: 4523.643,
+        -      cruelness: 4,
+        -      favoring: "2029-09-10",
+        -      landowner: "Evil Cackle",
+        -      spinout: "AAA3",
+        -      stagnant: "2029-01-01",
+        -      uncooked: nil,
+        -      whinny: "USD",
+        -      wobbly: "AAA333AAA333AAA333",
+        +      swung: 999,
+        +      tactical: "Barber boy",
+        +      thermal: "USD",
+        +      thyself: "Evil Cackle",
+        +      tigress: 4,
+        +      tipping: "XY342",
+        +      uncombed: "AAA333AAA333AAA333",
              },
            ],
-        -  "cupcake" => true,
-        +  "late" => true,
          }
       DIFF
     end
 
     it "uses text diff when 5\% of the changes are value changes" do
       hash1 = {
+        "cupcake" => true,
         "slasher" => [
           {
-            cruelness: 90001,
-            stagnant: "2029-01-02",
-            uncooked: "true",
-            spinout: "AAA4",
-            favoring: "2029-09-10",
-            whinny: "USD",
-            ascertain: 999,
             angriness: "XY342",
-            wobbly: "RTHITHIRTO334",
-            blooper: "Barber boy",
-            landowner: "Evil Cackle",
+            ascertain: 999,
             asleep: [
               {
                 crispness: 2,
                 landless: "dry",
+                mama: "AAA",
                 surging: nil,
                 tattoo: 2104.92,
-                mama: "AAA",
               },
               {
                 crispness: 3,
                 landless: "pony",
+                mama: "AAA",
                 surging: nil,
                 tattoo: 2104.92,
-                mama: "AAA",
               },
             ],
+            blooper: "Barber boy",
             creatable: 4523.643,
+            cruelness: 90001,
+            favoring: "2029-09-10",
+            landowner: "Evil Cackle",
+            spinout: "AAA4",
+            stagnant: "2029-01-02",
+            uncooked: "true",
+            whinny: "USD",
+            wobbly: "RTHITHIRTO334",
           },
         ],
-        "cupcake" => true,
       }
       hash2 = {
         "slasher" => [
           {
-            payable: 90001,
-            street: "2029-01-02",
-            unsorted: "true",
-            bullpen: "AAA4",
-            favoring: "2029-09-10",
-            nuzzle: "USD",
-            ascertain: 999,
             angriness: "XY342",
-            wobbly: "RTHITHIRTO334",
-            blooper: "Barber boy",
-            running: "Evil Cackle",
+            ascertain: 999,
             asleep: [
               {
+                amperage: nil,
                 crispness: 2,
                 landless: "dry",
-                amperage: nil,
-                tattoo: 2104.92,
                 mama: "AAA",
+                tattoo: 2104.92,
               },
               {
+                amperage: nil,
                 crispness: 3,
                 landless: "pony",
-                amperage: nil,
-                tattoo: 2104.92,
                 mama: "ABA",
+                tattoo: 2104.92,
               },
             ],
             banner: 4523.643,
+            blooper: "Barber boy",
+            bullpen: "AAA4",
+            favoring: "2029-09-10",
+            nuzzle: "USD",
+            payable: 90001,
+            running: "Evil Cackle",
+            street: "2029-01-02",
+            unsorted: "true",
+            wobbly: "RTHITHIRTO334",
           },
         ],
       }
@@ -683,52 +731,51 @@ RSpec.describe "Specdiff" do
 
       expect(result.empty?).to eq(false)
       expect(result.to_s).to eq(<<~DIFF)
-        @@ -1,36 +1,35 @@
+        @@ -1,34 +1,33 @@
          {
+        -  "cupcake" => true,
            "slasher" => [
              {
-        -      cruelness: 90001,
-        -      stagnant: "2029-01-02",
-        -      uncooked: "true",
-        -      spinout: "AAA4",
-        +      payable: 90001,
-        +      street: "2029-01-02",
-        +      unsorted: "true",
-        +      bullpen: "AAA4",
-               favoring: "2029-09-10",
-        -      whinny: "USD",
-        +      nuzzle: "USD",
-               ascertain: 999,
                angriness: "XY342",
-               wobbly: "RTHITHIRTO334",
-               blooper: "Barber boy",
-        -      landowner: "Evil Cackle",
-        +      running: "Evil Cackle",
+               ascertain: 999,
                asleep: [
                  {
+        +          amperage: nil,
                    crispness: 2,
                    landless: "dry",
-        -          surging: nil,
-        +          amperage: nil,
-                   tattoo: 2104.92,
                    mama: "AAA",
+        -          surging: nil,
+                   tattoo: 2104.92,
                  },
                  {
+        +          amperage: nil,
                    crispness: 3,
                    landless: "pony",
-        -          surging: nil,
-        +          amperage: nil,
-                   tattoo: 2104.92,
         -          mama: "AAA",
+        -          surging: nil,
         +          mama: "ABA",
+                   tattoo: 2104.92,
                  },
                ],
-        -      creatable: 4523.643,
         +      banner: 4523.643,
+               blooper: "Barber boy",
+        -      creatable: 4523.643,
+        -      cruelness: 90001,
+        +      bullpen: "AAA4",
+               favoring: "2029-09-10",
+        -      landowner: "Evil Cackle",
+        -      spinout: "AAA4",
+        -      stagnant: "2029-01-02",
+        -      uncooked: "true",
+        -      whinny: "USD",
+        +      nuzzle: "USD",
+        +      payable: 90001,
+        +      running: "Evil Cackle",
+        +      street: "2029-01-02",
+        +      unsorted: "true",
+               wobbly: "RTHITHIRTO334",
              },
            ],
-        -  "cupcake" => true,
-         }
       DIFF
     end
 

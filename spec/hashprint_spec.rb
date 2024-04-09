@@ -129,7 +129,7 @@ RSpec.describe "Specdiff::Hashprint" do
       time: Time.new(2000, 1, 1, 5, 34, 1, "+02:00"),
       date: Date.new(1999, 12, 31),
       datetime: DateTime.new(2001, 2, 3, 4, 5, 6, "+0700"),
-      a_normal_class: Module,
+      Class => Module, # prevent the hash from being sorted
       fallback_to_inspect: inspecty_boi,
       uninspectable1: basic_object,
       uninspectable2: inspect_was_undefd,
@@ -157,7 +157,7 @@ RSpec.describe "Specdiff::Hashprint" do
         time: #<Time: 2000-01-01 05:34:01 +0200>,
         date: #<Date: 1999-12-31>,
         datetime: #<DateTime: 2001-02-03T04:05:06+07:00>,
-        a_normal_class: Module,
+        Class => Module,
         fallback_to_inspect: <Inspecty boi>,
         uninspectable1: #<uninspectable MyBasicObjectClass>,
         uninspectable2: #<uninspectable ConstantForTheSolePurposeOfUndefiningInspect>,
@@ -186,42 +186,44 @@ RSpec.describe "Specdiff::Hashprint" do
     TXT
   end
 
-  it "prints a hash with symbol keys" do
+  it "sorts and prints a hash with symbol keys" do
     expect(call({
       test: "testing",
       one_two_three: 123,
       is_this_thing_on: :haha,
     })).to eq(<<~TXT.chomp)
       {
-        test: "testing",
-        one_two_three: 123,
         is_this_thing_on: :haha,
+        one_two_three: 123,
+        test: "testing",
       }
     TXT
   end
 
-  it "prints a hash with string keys" do
+  it "sorts and prints a hash with string keys" do
     expect(call({
       "test" => "testing",
       "one, two, three" => 123,
       "is_this_thing_on" => "haha",
     })).to eq(<<~TXT.chomp)
       {
-        "test" => "testing",
-        "one, two, three" => 123,
         "is_this_thing_on" => "haha",
+        "one, two, three" => 123,
+        "test" => "testing",
       }
     TXT
   end
 
-  it "prints a hash with mixed keys" do
+  it "sorts and prints a hash with mixed keys" do
     expect(call({
       x: "y",
       "ping" => "pong",
+      "abracadabra" => :hmm,
     })).to eq(<<~TXT.chomp)
       {
-        x: "y",
+        "abracadabra" => :hmm,
         "ping" => "pong",
+        x: "y",
       }
     TXT
   end
@@ -237,8 +239,8 @@ RSpec.describe "Specdiff::Hashprint" do
         },
       },
       beta: {
-        released: true,
         delayed: false,
+        released: true,
       },
     }
 
@@ -255,8 +257,8 @@ RSpec.describe "Specdiff::Hashprint" do
           },
         },
         beta: {
-          released: true,
           delayed: false,
+          released: true,
         },
       }
     TXT
@@ -268,7 +270,7 @@ RSpec.describe "Specdiff::Hashprint" do
     layer11 = [2, layer12]
     root[2] = layer11
 
-    layer21 = {x: "y", root: root}
+    layer21 = {root: root, x: "y"}
     root[4] = layer21
 
     expect(call(root)).to eq(<<~TXT.chomp)
@@ -285,40 +287,41 @@ RSpec.describe "Specdiff::Hashprint" do
         ],
         nil,
         {
-          x: "y",
           root: [...],
+          x: "y",
         },
       ]
     TXT
   end
 
   it "deals with hash that contains itself" do
-    root = {ha: :ha, "ha" => "ha", date: Date.new(2024, 1, 1)}
+    root = {date: Date.new(2024, 1, 1), ha: :ha, "ha" => "ha"}
 
-    layer12 = {root: root, date: Date.new(1923, 1, 1)}
+    layer12 = {date: Date.new(1923, 1, 1), root: root}
     layer11 = {layer12: layer12}
-    root[:oh_no] = layer11
 
     layer21 = [nil, :x, root, "ha"]
+
     root[:i_love_arrays] = layer21
+    root[:oh_no] = layer11
 
     expect(call(root)).to eq(<<~TXT.chomp)
       {
+        date: #<Date: 2024-01-01>,
         ha: :ha,
         "ha" => "ha",
-        date: #<Date: 2024-01-01>,
-        oh_no: {
-          layer12: {
-            root: {...},
-            date: #<Date: 1923-01-01>,
-          },
-        },
         i_love_arrays: [
           nil,
           :x,
           {...},
           "ha",
         ],
+        oh_no: {
+          layer12: {
+            date: #<Date: 1923-01-01>,
+            root: {...},
+          },
+        },
       }
     TXT
   end
@@ -334,7 +337,7 @@ RSpec.describe "Specdiff::Hashprint" do
     veta[:b] = jeta
 
     root = {
-      hashes: {
+      _hashes: { # _ makes it first in the sort order
         {} => {ya: "boi"},
         {1 => 2} => [],
         {2 => 3} => {},
@@ -362,7 +365,7 @@ RSpec.describe "Specdiff::Hashprint" do
 
     expect(call(root)).to eq(<<~TXT.chomp)
       {
-        hashes: {
+        _hashes: {
           {} => {
             ya: "boi",
           },

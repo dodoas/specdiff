@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Hashprint now sorts keys (if all the keys are strings or symbols), leading to better text diffs from the hash differ.
+
 ## [0.3.0.rc2] - 2024-04-05
 
 ### Changed
