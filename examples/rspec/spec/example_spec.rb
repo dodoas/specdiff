@@ -35,29 +35,35 @@ RSpec.describe "" do
 
       it "long multiline strings" do
         s1 = <<~MSG
-          this is gtex
+          Lorem ipsum dolor sit amet,
+          consectetur adipiscing elit,
+          sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-          <hml> haha </hml>
+          Ut enim ad minim veniam,
+          quis nostrud exercitation ullamco laboris nisi ut aliquip
+          ex ea commodo consequat.
+          Duis aute irure dolor in reprehenderit in voluptate velit
+          esse cillum dolore eu fugiat nulla pariatur.
 
-          pweoekeoekwpef
-
-          cam shaft motorway
-          ca shaft morord day
-
-          video games
+          Excepteur sint occaecat cupidatat non proident,
+          sunt in culpa qui officia deserunt mollit anim id est laborum.
         MSG
 
         s2 = <<~MSG
-            You can have as many gain nodes as you want (this is how you could achieve mixing bus-like setups, for example), so that's not the problem. Your problem is the following:
+          Lirem ipsum dolor sit amet,
+          consectetur adipiscing elit,
+          sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-          Remember that the second parameter to linearRampToValueAtTime() is time in the same time coordinate system as your context.currentTime.
+          Tu mine da minim mainem,
+          quis nostrud exercitation ullamco laboris nisi ut aliquip
+          ex ea commodo consequat.
+          Dui aute irure dolor in reprehenderi in voluptate velit
+          esse cillum dolore eu fugiat nolla pariatur.
 
-          And your context.currentTime is always moving forward in real time, so all your ramps, curves, etc. should be calculated relative to it.
+          x
 
-          If you want something to happen 4 seconds from now, you'd pass context.currentTime + 4 to the Web Audio API function.
-
-          So, change all your calls linearRampToValueAtTime() in your code, so that they look like:
-
+          Excepteur sint occaecat cupidatat non proident,
+          sunt in culpa qui officia deserunt mollit anim id est laborum.
         MSG
 
         expect(s1).to eq(s2)
@@ -319,6 +325,63 @@ RSpec.describe "" do
         }).to eq({
           test: lambda do sleep 1 end,
           x: "43",
+        })
+      end
+
+      it "the hash diff example" do
+        expect({
+          data: {
+            latitude: 200,
+            longitude: 60,
+            hourly: {
+              time: ["2022-07-01T00:00", "2022-07-01T01:00", "2022-07-01T02:00"],
+              temperature: [13, 12.7, 12.5],
+            },
+            hourly_units: {
+              temperature: "°C",
+            },
+          },
+        }).to eq({
+          data: {
+            latitude: 200,
+            "longitude" => 60,
+            generationtime_ms: 2.2342,
+            hourly: {
+              time: ["2022-07-01T01:00", "2022-07-01T02:00", "2022-07-01T03:00"],
+              temperature: [12.7, 12.5, 12.3],
+            },
+            hourly_units: {
+              temperature: "°F",
+            },
+          },
+        })
+      end
+
+      it "the hash text diff example" do
+        expect({
+          data: {
+            latitude: 200,
+            longitude: 60,
+            hourly: {
+              time: ["2022-07-01T00:00", "2022-07-01T01:00", "2022-07-01T02:00"],
+              temperature: [13, 12.7, 12.5],
+            },
+            hourly_units: {
+              temperature: "°C",
+            },
+          },
+        }).to eq({
+          "data" => {
+            "latitude" => 200,
+            "longitude" => 60,
+            "hourly" => {
+              "time" => ["2022-07-01T00:00", "2022-07-01T01:00", "2022-07-01T02:00"],
+              "temperature" => [13, 12.7, 12.5],
+            },
+            "hourly_units" => {
+              "temperature" => "°C",
+            },
+          },
         })
       end
     end

@@ -8,7 +8,15 @@ Gem::Specification.new do |spec|
   spec.authors = ["Odin Heggvold Bekkelund"]
   spec.email = ["odinhb@protonmail.com"]
 
-  spec.summary = "Improved request body diffs for webmock"
+  spec.summary = "Improved diffing for WebMock and RSpec"
+  spec.description = <<~TXT
+    Specdiff aims to improve both RSpec's and WebMock's diffing by applying \
+    opinionated heuristics, and comes with integrations (monkey-patches) for \
+    both. Particularly noteworthy improvements are made to working with deeply \
+    nested hash/array structures in RSpec, and plaintext/xml request bodies in \
+    WebMock.
+  TXT
+
   spec.homepage = "https://github.com/odinhb/specdiff"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"

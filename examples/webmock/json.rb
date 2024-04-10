@@ -12,8 +12,17 @@ WebMock.show_body_diff! # on by default
 stub_request(:post, "https://www.example.com")
   .with(
     body: JSON.generate({
-      my_hash: "is great",
-      the_hash: "is amazing",
+      data: {
+        latitude: 200,
+        longitude: 60,
+        hourly: {
+          time: ["2022-07-01T00:00", "2022-07-01T01:00", "2022-07-01T02:00"],
+          temperature: [13, 12.7, 12.5],
+        },
+        hourly_units: {
+          temperature: "°C",
+        },
+      },
     })
   )
   .to_return(status: 400, body: "hello")
@@ -21,9 +30,20 @@ stub_request(:post, "https://www.example.com")
 begin
   HTTP.post(
     "https://www.example.com",
+    headers: {"Content-Type" => "application/json"},
     body: JSON.generate({
-      i_had_to_go: "and post a different hash",
-      my_hash: "is different",
+      data: {
+        latitude: 200,
+        longitude: 60,
+        generationtime_ms: 2.2342,
+        hourly: {
+          time: ["2022-07-01T01:00", "2022-07-01T02:00", "2022-07-01T03:00"],
+          temperature: [12.7, 12.5, 12.3],
+        },
+        hourly_units: {
+          temperature: "°F",
+        },
+      },
     }),
   )
 rescue WebMock::NetConnectNotAllowedError => e
