@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.name = "specdiff"
   spec.version = Specdiff::VERSION
   spec.authors = ["Odin Heggvold Bekkelund"]
-  spec.email = ["odinhb@protonmail.com"]
+  spec.email = ["odin.heggvold.bekkelund@dev.dodo.no"]
 
   spec.summary = "Improved diffing for WebMock and RSpec"
   spec.description = <<~TXT
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
     WebMock.
   TXT
 
-  spec.homepage = "https://github.com/odinhb/specdiff"
+  spec.homepage = "https://github.com/dodoas/specdiff"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
