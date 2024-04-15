@@ -15,20 +15,32 @@ class Specdiff::Differ::Text
     b_value = b.value
 
     if a_value.encoding != b_value.encoding
-      return <<~MSG
+      return colorize_by_line(<<~MSG) do |line|
         Strings have different encodings:
           #{a.value.encoding.inspect} != #{b.value.encoding.inspect}
       MSG
+        # makes it stand out a bit more from the red of rspec output
+        reset_color(line)
+      end
     end
 
     diff = ""
 
+    # if there are no newlines then the text differ doesn't produce any valuable
+    # output. "word diffing" would improve this case.
+    if a_value.count(NEWLINE) <= 1 && b_value.count(NEWLINE) <= 1
+      return diff
+    end
+
     a_lines = a_value.split(NEWLINE).map! { _1.chomp }
     b_lines = b_value.split(NEWLINE).map! { _1.chomp }
+
+    file_length_difference = 0
+
     hunks = ::Diff::LCS.diff(a_lines, b_lines).map do |piece|
       ::Diff::LCS::Hunk.new(
-        a_lines, b_lines, piece, CONTEXT_LINES, 0,
-      )
+        a_lines, b_lines, piece, CONTEXT_LINES, file_length_difference,
+      ).tap { |hunk| file_length_difference = hunk.file_length_difference }
     end
 
     hunks.each_cons(2) do |prev_hunk, current_hunk|
@@ -36,7 +48,7 @@ class Specdiff::Differ::Text
         if current_hunk.overlaps?(prev_hunk)
           current_hunk.merge(prev_hunk)
         else
-          diff << prev_hunk.diff(:unified).to_s
+          diff << prev_hunk.diff(:unified)
         end
       ensure
         diff << NEWLINE
@@ -44,12 +56,14 @@ class Specdiff::Differ::Text
     end
 
     if hunks.last
-      diff << hunks.last.diff(:unified).to_s
+      diff << NEWLINE
+      diff << hunks.last.diff(:unified)
     end
 
     return diff if diff == ""
 
-    diff << "\n"
+    diff << NEWLINE
+    diff.lstrip!
 
     return colorize_by_line(diff) do |line|
       case line[0].chr
@@ -59,7 +73,7 @@ class Specdiff::Differ::Text
         red(line)
       when "@"
         if line[1].chr == "@"
-          blue(line)
+          cyan(line)
         else
           reset_color(line)
         end

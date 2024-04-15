@@ -8,7 +8,15 @@ Gem::Specification.new do |spec|
   spec.authors = ["Odin Heggvold Bekkelund"]
   spec.email = ["odinhb@protonmail.com"]
 
-  spec.summary = "Improved request body diffs for webmock"
+  spec.summary = "Improved diffing for WebMock and RSpec"
+  spec.description = <<~TXT
+    Specdiff aims to improve both RSpec's and WebMock's diffing by applying \
+    opinionated heuristics, and comes with integrations (monkey-patches) for \
+    both. Particularly noteworthy improvements are made to working with deeply \
+    nested hash/array structures in RSpec, and plaintext/xml request bodies in \
+    WebMock.
+  TXT
+
   spec.homepage = "https://github.com/odinhb/specdiff"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
@@ -17,13 +25,12 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/CHANGELOG.md"
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").reject do |f|
-      (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
-    end
-  end
+  spec.files =
+    Dir["*.gemspec"] +
+    Dir["*.md"] +
+    Dir["*.txt"] +
+    Dir[".gitignore"] +
+    Dir["lib/**/*.rb"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "hashdiff", "~> 1.0"

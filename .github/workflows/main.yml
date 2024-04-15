@@ -1,4 +1,4 @@
-name: Ruby
+name: Tests
 
 on:
   push:
@@ -7,10 +7,12 @@ on:
 
   pull_request:
 
+  workflow_dispatch:
+
 jobs:
-  build:
+  tests:
+    name: Run tests and linting on Ruby ${{ matrix.ruby }}
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
     strategy:
       matrix:
         ruby:

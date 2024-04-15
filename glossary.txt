@@ -44,3 +44,7 @@ side
 compare
   the procedure that implements the main function of specdiff including
   accounting for any plugin types and differs
+
+integration
+  refers to the provided monkey-patches and conscious relationship between
+  specdiff and another gem or piece of software it was intended to work with.

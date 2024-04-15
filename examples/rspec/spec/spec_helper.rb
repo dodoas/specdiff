@@ -1,14 +1,5 @@
 Bundler.require
-require "specdiff"
-require "specdiff/rspec" # dogfooding, be sure to turn this off when you break specdiff
-
-def fixture_path
-  Pathname.new("#{__dir__}/fixtures")
-end
-
-Specdiff.configure do |config|
-  config.colorize = false
-end
+require "specdiff/rspec"
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
@@ -74,12 +65,4 @@ end
 
 class ConstantForTheSolePurposeOfUndefiningInspect
   undef_method :inspect
-end
-
-def measure_runtime
-  t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second)
-  yield
-  t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second)
-
-  t1 - t0
 end

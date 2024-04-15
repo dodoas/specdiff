@@ -1,4 +1,4 @@
-RSpec.describe "optional included json differ support" do
+RSpec.describe "json plugin" do
   def diff(...) = Specdiff.diff(...)
 
   before(:all) do
@@ -27,28 +27,67 @@ RSpec.describe "optional included json differ support" do
 
     result = diff(json1, json2)
 
-    expect(result.types).to eq([:hash, :hash])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      changed "key1" from 435 to 453
-      changed "key2" from "yes" to 342
-      changed "key3" from "bongo452" to "video"
-      changed "key5" from "present!" to nil
+      @@ +0/-0/~4 @@
+        new value: "key1" (435 -> 453)
+        new value: "key2" ("yes" -> 342)
+        new value: "key3" ("bongo452" -> "video")
+        new value: "key5" ("present!" -> nil)
     DIFF
+    expect(result.types).to eq([:hash, :hash])
+  end
+
+  it "diffs json where key names change" do
+    json1 = {
+      confused: true,
+      intellectual: true,
+      mixture: true,
+      seemingly: true,
+      unintelligible: true,
+    }.to_json
+    json2 = {
+      confusinated: true,
+      intellectual: true,
+      mixd: true,
+      seems: true,
+      unintelligibleh: true,
+    }.to_json
+
+    result = diff(json1, json2)
+
+    expect(result.empty?).to eq(false)
+    expect(result.to_s).to eq(<<~DIFF)
+       @@ -1,8 +1,8 @@
+        {
+       -  "confused" => true,
+       +  "confusinated" => true,
+          "intellectual" => true,
+       -  "mixture" => true,
+       -  "seemingly" => true,
+       -  "unintelligible" => true,
+       +  "mixd" => true,
+       +  "seems" => true,
+       +  "unintelligibleh" => true,
+        }
+    DIFF
+    expect(result.types).to eq([:text, :text])
   end
 
   it "diffs json strings" do
-    json1 = '"test json string"'
-    json2 = '"test json stirng"'
+    json1 = '"test\njson\nstring"'
+    json2 = '"test\njson\nstirng"'
 
     result = diff(json1, json2)
 
     expect(result.types).to eq([:text, :text])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      @@ -1 +1 @@
-      -test json string
-      +test json stirng
+       @@ -1,4 +1,4 @@
+        test
+        json
+       -string
+       +stirng
     DIFF
   end
 
@@ -72,9 +111,10 @@ RSpec.describe "optional included json differ support" do
     expect(result.types).to eq([:array, :array])
     expect(result.empty?).to eq(false)
     expect(result.to_s).to eq(<<~DIFF)
-      changed [0] from 1 to {}
-      changed [2] from 3 to "3"
-      added [4] with value []
+      @@ +1/-0/~2 @@
+        extra key: [4] ([])
+        new value: [0] (1 -> {})
+        new value: [2] (3 -> "3")
     DIFF
   end
 
@@ -95,8 +135,9 @@ RSpec.describe "optional included json differ support" do
     expect(result1.types).to eq([:hash, :hash])
     expect(result1.empty?).to eq(false)
     expect(result1.to_s).to eq(<<~DIFF)
-      changed "my_hash" from "my hash" to "my (not) hash"
-      changed "this" from "is" to "isn't"
+      @@ +0/-0/~2 @@
+        new value: "my_hash" ("my hash" -> "my (not) hash")
+        new value: "this" ("is" -> "isn't")
     DIFF
 
     result2 = diff(hash, json)
@@ -104,8 +145,9 @@ RSpec.describe "optional included json differ support" do
     expect(result2.types).to eq([:hash, :hash])
     expect(result2.empty?).to eq(false)
     expect(result2.to_s).to eq(<<~DIFF)
-      changed "my_hash" from "my (not) hash" to "my hash"
-      changed "this" from "isn't" to "is"
+      @@ +0/-0/~2 @@
+        new value: "my_hash" ("my (not) hash" -> "my hash")
+        new value: "this" ("isn't" -> "is")
     DIFF
   end
 
@@ -131,5 +173,40 @@ RSpec.describe "optional included json differ support" do
 
     expect(result.empty?).to eq(true)
     expect(result.to_s).to eq("")
+  end
+
+  # I don't think we want this thing to infinitely recurse into json
+  # structures to diff them.
+  it "only parses jsons one level deep" do
+    json1 = JSON.generate({x: "y"})
+    json2 = JSON.generate({l: json1})
+    json3 = JSON.generate({o: json2})
+    json4 = JSON.generate({x: "z"})
+
+    result = diff(json3, json4)
+    expect(result.empty?).to eq(false)
+    expect(result.to_s).to eq(<<~DIFF)
+      @@ -1,4 +1,4 @@
+       {
+      -  "o" => "{\\"l\\":\\"{\\\\\\"x\\\\\\":\\\\\\"y\\\\\\"}\\"}",
+      +  "x" => "z",
+       }
+    DIFF
+  end
+
+  it "only parses json strings one level deep" do
+    json1 = JSON.generate({x: "y"})
+    json2 = "\"#{json1}\""
+    json3 = "\"s\nl\nm\nba\""
+
+    result = diff(json2, json3)
+    expect(result.to_s).to eq(<<~DIFF)
+      @@ -1,4 +1,7 @@
+      -"{"x":"y"}"
+      +"s
+      +l
+      +m
+      +ba"
+    DIFF
   end
 end
