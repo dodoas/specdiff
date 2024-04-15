@@ -1,5 +1,6 @@
 raise "webmock must be required before specdiff/webmock" unless defined?(WebMock)
 
+# https://github.com/bblimke/webmock/blob/v3.23.0/lib/webmock/request_body_diff.rb
 module WebMock
   class RequestBodyDiff
     def initialize(request_signature, request_stub)

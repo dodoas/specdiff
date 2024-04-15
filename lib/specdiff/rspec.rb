@@ -1,6 +1,7 @@
 raise "rspec must be required before specdiff/rspec!" unless defined?(RSpec)
 raise "RSpec::Support is missing????" unless defined?(RSpec::Support)
 
+# https://github.com/rspec/rspec-support/blob/v3.13.1/lib/rspec/support/differ.rb
 class RSpec::Support::Differ
   alias old_diff diff
 
@@ -16,6 +17,7 @@ end
 
 # This stops rspec from truncating strings w/ ellipsis, as well as making the
 # "inspect" output consistent with specdiff's.
+# https://github.com/rspec/rspec-support/blob/v3.13.1/lib/rspec/support/object_formatter.rb
 class RSpec::Support::ObjectFormatter
   def format(object)
     ::Specdiff.diff_inspect(object)
