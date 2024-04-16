@@ -37,7 +37,6 @@ begin
         longitude: 60,
         generationtime_ms: 2.2342,
         hourly: {
-          time: ["2022-07-01T01:00", "2022-07-01T02:00", "2022-07-01T03:00"],
           temperature: [12.7, 12.5, 12.3],
         },
         hourly_units: {
